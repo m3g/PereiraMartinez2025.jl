@@ -3,7 +3,7 @@ Pkg.add("Documenter")
 using Documenter
 push!(LOAD_PATH, "../src/")
 makedocs(
-    modules = [PereiraMartinez2024],
+    #modules = [PereiraMartinez2024],
     sitename = "PereiraMartinez2024.jl",
     pages = [
         "Home" => "index.md",
