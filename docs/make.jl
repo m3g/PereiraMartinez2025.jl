@@ -33,7 +33,8 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
-        "TMAO solutions" => "pluto_notebooks/sh3_tmao.md",
+        "BdpA in urea" => "pluto_notebooks/proteinA_urea.md",
+        "RNase T1 in urea" => "pluto_notebooks/rnase1_urea.md",
     ],
 )
 deploydocs(

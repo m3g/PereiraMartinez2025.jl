@@ -4,6 +4,12 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 96e27383-8c0b-4b95-b7fb-80bb97f390bb
+import Pkg
+
+# ╔═╡ dff61cee-c2c4-41aa-8fc1-fbac08a67beb
+using Trapz
+
 # ╔═╡ 3bac1a1e-9bb1-4125-9b58-2bd43d959fa9
 using MolSimToolkit
 
@@ -29,28 +35,28 @@ begin
 end
 
 # ╔═╡ 6edcdced-5fb5-41f4-a741-27c98dcbd1b4
-md"# Computing the free energy of transfer"
+md"# RNaseT1 transfer free energy to urea"
 
 # ╔═╡ 3b976cdf-09d2-4c43-881c-c1eadb4ea238
-md"## Aqueous solutions of TMAO"
+md"## Aqueous solutions of urea: experimental data"
 
 # ╔═╡ 19208b6e-7039-11ef-2685-c9fd57102877
 md"""
-In Lin & Timasheff (Biochemistry 1994, 13, 12695), the activity coefficients ($\gamma_3$) of TMAO in aqueous solutions and the corresponding densities are provided. The data provided is that of $\gamma_3$ as a function of the concentration $m_3$ (in mol/kg):
+In [Lin & Timasheff, Biochemistry, 1994](https://pubs.acs.org/doi/10.1021/bi00208a021), the activity coefficients ($\gamma_3$) of urea in aqueous solutions and the corresponding densities are provided. The data provided is that of $\gamma_3$ as a function of the concentration $m_3$ (in mol/kg):
 
 """
 
 # ╔═╡ 77c25151-8673-4ec1-9687-80f1fceb4e5c
-md"### Properties of aqueous solutions of TMAO"
+md"### Properties of aqueous solutions of urea"
 
 # ╔═╡ 6f3ec99b-15b1-4014-b146-09e29864382c
-md"Experimental data for TMAO aqueous solutions (28$^\circ$C):"
+md"Experimental data for urea aqueous solutions (28$^\circ$C):"
 
 # ╔═╡ 8293f49a-57a1-49b5-a2da-95a43b4cd097
-tmao_data = DataFrame(
-	:m₃ => [0.0, 0.25, 0.52, 1.08]u"mol/kg",
-	:γ₃ => [1.0, 0.992, 0.965, 0.883],
-	:ρ₀ => [0.996232, 1.0029, 1.0034, 1.0058]u"g/mL",
+urea_data = DataFrame(
+	:m₃ => [0.0, 0.51, 1.05, 2.20]u"mol/kg",
+	:γ₃ => [1.0, 0.960, 0.924, 0.859],
+	:ρ₀ => [0.9970, 1.0084, 1.0160, 1.0298]u"g/mL",
 )
 
 # ╔═╡ 1ca88373-114c-464d-aaac-9f3b25893820
@@ -60,14 +66,16 @@ The data above is used to compute the $(\partial\ln\gamma_3/\partial m_3)$ quant
 
 # ╔═╡ 90ad306d-163e-4fb3-a00e-6b86c32900f9
 begin
-scatter(MolSimStyle,
-	tmao_data[!,:m₃], log.(tmao_data[!,:γ₃]),
-	xlabel=L"m_3", ylabel=L"\ln(\gamma_3)", label="TMAO", color=:red,
+p0 = scatter(MolSimStyle,
+	urea_data[!,:m₃], log.(urea_data[!,:γ₃]),
+	xlabel=L"m_3", ylabel=L"\ln(\gamma_3)", label="urea", color=:blue,
 )
-plot!(
-	tmao_data[!,:m₃], log.(tmao_data[!,:γ₃]); 
-	label=nothing, color=:red,
+plot!(p0,
+	urea_data[!,:m₃], log.(urea_data[!,:γ₃]); 
+	label=nothing, color=:blue,
 )
+plot!(p0, size=(400,300))
+p0
 end
 
 # ╔═╡ 357f0851-8ba2-4dbe-9c49-e5bd15f3f93b
@@ -76,13 +84,13 @@ The shape of the plot suggests that a quadratic fit will capture precisely the t
 """
 
 # ╔═╡ e30af672-9c42-4d19-8b5b-dbf1dc0d9680
-tmao_fit = fitquadratic(tmao_data[!,:m₃]),log.(tmao_data[!,:γ₃]))
+urea_fit = fitquadratic(urea_data[!,:m₃],log.(urea_data[!,:γ₃]))
 
 # ╔═╡ c08a180a-e8cf-4f02-9451-1d40fb96a653
 md"The derivative of the logarithmic of the activity coefficient as a function of the molality is, then, the derivative of the above quadratic fit:"
 
 # ╔═╡ f9ec92d4-4ab4-4a9c-b240-7fe5d28e0018
-∂lnγ₃∂m₃(m₃) = (2 * tmao_fit.a * ustrip(m₃) + tmao_fit.b) / (oneunit(m₃))
+∂lnγ₃∂m₃(m₃) = 2 * urea_fit.a * m₃ + urea_fit.b
 
 # ╔═╡ 24202850-e8fa-4172-91f9-d31ad67e0d3e
 md"""
@@ -90,13 +98,37 @@ Which can be computed for the concentrations given in Table 2 of the article, an
 """
 
 # ╔═╡ c18b8343-1911-4864-918f-2083637524d7
-tmao_data[:, :∂lnγ₃∂m₃] = ∂lnγ₃∂m₃.(tmao_data[!,:m₃])
+urea_data[:, :∂lnγ₃∂m₃] = ∂lnγ₃∂m₃.(urea_data[!,:m₃])
 
 # ╔═╡ 72b526a6-6e22-40a1-ac76-8f766681ff87
-tmao_data
+urea_data
+
+# ╔═╡ 7027914f-2195-472e-968e-c5e587b84dba
+md"We also obtain an expression for the density as a function of the concentration, in mol/L:"
+
+# ╔═╡ c1940fde-3164-40e7-8679-c16e872c38b8
+begin
+	# convert concentration to mol/L
+	c3 = uconvert.(u"mol/L", urea_data[!,:m₃] .* urea_data[!,:ρ₀])
+	p1 = scatter(MolSimStyle, 
+		c3, urea_data[!,:ρ₀],
+		label=:none,
+	    xlabel=L"c_3", ylabel=L"\rho_0", color=:blue,
+	)
+	density_fit = fitquadratic(c3, urea_data[!,:ρ₀])
+	plot!(p1, density_fit.x, density_fit.y, label=:none, color=:blue)
+	plot!(p1, size=(400,300))
+	p1
+end
+
+# ╔═╡ b18ed62a-9b12-467d-b289-7720a45817d3
+md"Where the fit is:"
+
+# ╔═╡ d4efcd42-14e6-46f0-85b7-0c917b09e7a1
+density_fit
 
 # ╔═╡ ea84b823-a39d-455c-be84-fe9dce10c4d8
-md"## RNaseT1 in TMAO (validation)"
+md"## RNaseT1 in urea"
 
 # ╔═╡ 7ee8f5de-12d7-4dac-8933-a319ee6ed77a
 md"""
@@ -110,100 +142,151 @@ $$\left(\frac{\partial\mu_2}{\partial m_3}\right)_{T,P,m_2} =
 """
 
 # ╔═╡ e5aedbda-67e9-465e-91f1-10125bee8dc0
-md"where, in the case of TMAO (species 3) and SH3 (solute, species 2) we have:"
+md"where, in the case of urea (species 3) and BpdA (solute, species 2) we have:"
 
 # ╔═╡ f9e5b61b-330d-40ee-8667-7af9012a6f62
-M3 = 75.10966u"g/mol"
+M3 = 60.06u"g/mol"
 
 # ╔═╡ 5fd21ecd-80ab-4d7f-ad64-cb33a399c289
-M2 = 11200u"g/mol"
+M2 = 11000u"g/mol"
 
 # ╔═╡ dd52ea0b-db95-4d07-8d12-cea548508033
-md"### Experimental preferential interaction parameters"
+md"### Converting concentrations:"
+
+# ╔═╡ 04514294-71e6-4185-b5a0-35eb09066e6f
+md"For the N and U states, the obtained bulk concentrations of urea are obtained from the simulations:"
+
+
+# ╔═╡ 14f768ba-30e1-4fbb-ba80-70065873a830
+c = DataFrame(
+    "N" => [0.5, 1.0, 2.0]u"mol/L",
+	"U" => [0.5, 1.0, 2.0]u"mol/L",
+)
+
+# ╔═╡ dbcd0df8-c2ee-4ba0-bcb5-75fe898b6f0f
+md"The densities corresponding to these concentrations, according to the experimental densities, are:"
+
+# ╔═╡ 5a27e717-91ff-4d60-9e57-d32330121090
+ρ = DataFrame(
+	"N" => density_fit.(c[!,"N"]),
+	"U" => density_fit.(c[!,"U"]),
+)
+
+# ╔═╡ fb3f40bf-4b4b-4992-9eb7-667d8b12fe64
+md"With which we can compute the molality of urea in each simulated concentration:"
+
+# ╔═╡ 23095d73-0957-450e-8537-72431506fd4d
+simulated_m₃ = DataFrame(
+	"N" => uconvert.(u"mol/kg", c[!,"N"] ./ ρ[!,"N"]),
+	"U" => uconvert.(u"mol/kg", c[!,"U"] ./ ρ[!,"U"]),
+)
+
+# ╔═╡ b2529e4f-a312-4adc-adf2-3f1f70a7b35f
+md"### Preferential interactions:"
 
 # ╔═╡ bb81d137-effe-4107-a61b-fd529cff8421
-md"The preferential interaction parameters obtained for the native state, in our simulations, as a function of the TMAO concentration, are:"
+md"The preferential interaction parameters of BpDA in urea, for the N8 and U6 states, are:"
 
 # ╔═╡ 813427fb-7d88-44f3-b118-2d5b94031a50
-∂g₃∂g₂ = [ 0.0008, -0.0096, -0.0450 ]
+∂g₃∂g₂ = DataFrame(
+	"N" => [0.0244, 0.0345, 0.0647],
+	"U" => [0.0247, 0.0542, 0.1445],
+)
+
+# ╔═╡ 4d8bfae0-2eda-462b-a9ec-c0082097305d
+begin
+	p3 = scatter(MolSimStyle,
+		simulated_m₃[!,"N"], ∂g₃∂g₂[!,"N"], label="N",
+		xlabel=L"m_3", ylabel=L"\partial g_2\partial g_3",
+	)
+	scatter!(p3,
+		simulated_m₃[!,"U"], ∂g₃∂g₂[!,"U"], label="U",
+	)
+	plot!(p3, size=(400,300))
+end
 
 # ╔═╡ e3e99ddc-36ea-4b53-bb07-753670a013db
-md"And using the gas constant in cal/(K mol):"
+md"And using the gas constant in kcal/(K mol), and the temperature in K:"
 
 # ╔═╡ 12fa8a68-6fed-4d1f-ac71-864ca078c5a7
-R = 1.98720425864083u"cal/(K*mol)"
+R = 1.9872036e-3u"kcal/(K*mol)"
+
+# ╔═╡ 6a7e36c3-f441-46e5-8070-906ee366260d
+T = 298u"K"
+
+# ╔═╡ b188c630-5beb-40e3-9b92-260b385fc295
+md"### The transfer free energy"
 
 # ╔═╡ e8345099-906f-4965-bd3b-1d3f80eb2250
 md"We can define Eq. 5 of the article (written above), as a function of the preferential interactions, molar mass of the cossolvent, and ∂lnγ₃∂m₃:"
 
 # ╔═╡ a8fc4634-018b-4633-85b3-fb0ba639a49a
-∂μ₃∂m₃(∂g₃∂g₂, m₃, ∂lnγ₃∂m₃,M2,M3) = 
-	-(∂g₃∂g₂) * (R * (28+273)u"K" * M2 / M3) * (1/m₃ + ∂lnγ₃∂m₃)
+∂μ₂∂m₃(∂g₃∂g₂, m₃, M2, M3) = 
+	-(∂g₃∂g₂) * (R * T * M2 / M3) * (1/m₃ + ∂lnγ₃∂m₃(m₃))
 
 # ╔═╡ 53c3949d-6e77-4606-8882-db4a798eed2c
 md"Applying this equation to the three possible sets of parameters for the three concentrations studied in the paper, we get:"
 
-# ╔═╡ bdc485f2-c99c-4383-b62e-cbafd4905a3a
-v1 = ∂μ₃∂m₃(∂g₃∂g₂[1], 0.25u"mol/kg", tmao_data[2,:∂lnγ₃∂m₃],M2,M3)
-
-# ╔═╡ 2e697f1e-9735-4e19-9a41-b614ca00ee30
-v2 = ∂μ₃∂m₃(∂g₃∂g₂[2], 0.52u"mol/kg", tmao_data[3,:∂lnγ₃∂m₃],M2,M3)
-
-# ╔═╡ 130657ad-3798-4f09-9d7d-14a64becc275
-v3 = ∂μ₃∂m₃(∂g₃∂g₂[3], 1.08u"mol/kg", tmao_data[4,:∂lnγ₃∂m₃],M2,M3)
-
-# ╔═╡ c583a2da-c662-4f5e-81e3-358bf2b02313
-md"""
-The values above are reasonably consistent with the reported -283, 1495 and 2973 cal/mol$^2$ of the paper.
-"""
+# ╔═╡ 9fa845c7-dd1e-40ea-9cd9-6126783aad94
+∂μ₂∂m₃_sim = DataFrame(
+    "N" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"N"], simulated_m₃[!,"N"], M2, M3),
+	"U" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"U"], simulated_m₃[!,"U"], M2, M3),
+)
 
 # ╔═╡ da89afa4-43bc-4906-b01b-9f6ec455f229
 md"""
-Now we can plot those values as function of the concentration of TMAO:
+Now we can plot those values as function of the concentration of urea:
 """
 
 # ╔═╡ 025fed74-93a2-4bb9-96b6-9e4c1a00c75d
 begin
-	scatter(tmao_data[2:4,:m₃], [v1,v2,v3] ./ 1000;
-	    xlabel=L"$m_3$", ylabel=L"\partial\mu_2 / \partial m_3",
-		label=nothing,
+	p2 = scatter(MolSimStyle,
+		simulated_m₃[!,"N"], ∂μ₂∂m₃_sim[!,"N"], label="N",
+		xlabel=L"m_3", ylabel=L"\partial\mu_2\partial m_3",
+		color=:blue,
 	)
-	f = fitlinear(ustrip.(tmao_data[2:4,:m₃]), ustrip.([v1,v2,v3] ./ 1000))
-	plot!(f.x,f.y; label=nothing, color=:blue)
-	plot!(xlims=[0,1.2], ylims=[-1,4])
+	plot!(p2, 
+		simulated_m₃[!,"N"], ∂μ₂∂m₃_sim[!,"N"], label=nothing,
+		fillrange=(0:0.5), fc=:blue, alpha=0.1, 
+	)
+	scatter!(p2,
+		simulated_m₃[!,"U"], ∂μ₂∂m₃_sim[!,"U"], label="U",
+		color=:orange,
+	)
+	plot!(p2, 
+		simulated_m₃[!,"U"], ∂μ₂∂m₃_sim[!,"U"], label=nothing,
+		fillrange=(0:0.5), fc=:orange, alpha=0.1, 
+	)
+	plot!(p2, size=(400,300))
 end
 
-# ╔═╡ f45236fa-2dbf-4351-8fc5-b785a2093c66
+# ╔═╡ 681ecbaa-1370-468a-b3d8-7f01b373b3f6
 md"""
-And this plot corresponds to Figure 4 of the article (open squares).
+The shaded areas are, qualitatively, the transfer free energy of each state up to each concentration. 
+
+The plot shows that at very low concentrations, the native state has a lower transfer free energy to urea than the denatured state. Thus, at this low concentration, the native state is stabilized in urea relative to the denatured state. 
+
+At higher urea concentrations the integral associated to the denatured state becomes progressively more negative, thus the denatured state is stabilized relative to the native state upon transfer to a urea solution. 
+
+Integrating these curves provides a qualitative measure of the free energy of transfer in each case:
 """
 
-# ╔═╡ e1784ad4-cd61-487d-ba87-00c0d137250b
-md"The line above was, then fitted by a line:"
+# ╔═╡ d904f54e-e284-46bb-b7a6-9fae79e01300
+Δμ₂_N = trapz(simulated_m₃[!,"N"],∂μ₂∂m₃_sim[!,"N"])
 
-# ╔═╡ f099e041-cf69-42ee-824a-716671b644b3
-tmao_fit2 = fitlinear(ustrip.(tmao_data[2:4,:m₃]), ustrip.([v1,v2,v3]))
+# ╔═╡ 5edbb407-3655-45f6-aa9b-8fae111b2eee
+Δμ₂_U = trapz(simulated_m₃[!,"U"],∂μ₂∂m₃_sim[!,"U"])
 
-# ╔═╡ a3b15f2f-95f6-48a5-a6af-0719ddeb91cd
-md"And we have, now the integral of this line computed from zero to each concentration:"
-
-# ╔═╡ f3f18145-5a3f-4929-8041-5769daf46d8c
-int(m₃, fit) = (fit.a/2)*ustrip(m₃)^2 + fit.b*ustrip(m₃)
-
-# ╔═╡ e4ebec31-d3b6-46ff-911f-05d7e16ed9e3
-int(tmao_data[2,:m₃], tmao_fit2)
-
-# ╔═╡ 098f69ac-a0d4-4f3f-b9d1-e8c860bef94f
-int(tmao_data[3,:m₃], tmao_fit2)
-
-# ╔═╡ 6fd98dd1-efca-4d7a-a9ad-c56dae973ab4
-int(tmao_data[4,:m₃], tmao_fit2)
-
-# ╔═╡ 40608ffb-14da-4643-8f86-86f20c93001a
-md"This last value is the one corresponding to the 1197 cal/mol reported for 1M TMAO in Table 5 of the article."
+# ╔═╡ 4f68effa-b334-4c85-b462-d5c6554e7ea3
+md"""
+Implying the the denatured state is more favorably transfered to a 0.5 mol/L aqueous urea solution than the native state.
+"""
 
 # ╔═╡ 6da7221d-55be-41c2-b74d-00e993d299f6
 md"### Packages used"
+
+# ╔═╡ 5275bb7b-944d-4c25-a46d-44bda09d07e1
+Pkg.status()
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -212,8 +295,10 @@ DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 EasyFit = "fde71243-0cda-4261-b7c7-4845bd106b21"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 MolSimToolkit = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+Trapz = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
@@ -223,6 +308,7 @@ LaTeXStrings = "~1.3.1"
 MolSimToolkit = "~1.18.1"
 Plots = "~1.40.8"
 PlutoUI = "~0.7.60"
+Trapz = "~2.0.3"
 Unitful = "~1.21.0"
 """
 
@@ -232,7 +318,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.0-rc3"
 manifest_format = "2.0"
-project_hash = "f4dcfd538520c8ac6ba7d903f51e1312568c0e4a"
+project_hash = "55045c72e7af5ece6a3c7703cf8f35843f41b634"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -296,9 +382,9 @@ version = "1.11.0"
 
 [[deps.AtomsBase]]
 deps = ["LinearAlgebra", "PeriodicTable", "Printf", "Requires", "StaticArrays", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "0fa9318ceff45a514bd1dbed7563b32ae2cdb73f"
+git-tree-sha1 = "aab46de4a22e3619fe0167a18019b94a65033bd7"
 uuid = "a963bdd2-2df7-4f54-a1ee-49d51e6be12a"
-version = "0.4.1"
+version = "0.4.2"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -516,9 +602,9 @@ version = "1.6.0"
 
 [[deps.EasyFit]]
 deps = ["LsqFit", "Parameters", "Statistics", "TestItems", "Unitful"]
-git-tree-sha1 = "a71d3ae61686877c11e0e5ff74892604c55bc2e0"
+git-tree-sha1 = "46097864204031cdf46d52f22cc8bf894c995cea"
 uuid = "fde71243-0cda-4261-b7c7-4845bd106b21"
-version = "0.6.7"
+version = "0.6.8"
 
     [deps.EasyFit.extensions]
     SplineFitExt = "Interpolations"
@@ -1461,14 +1547,19 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 version = "1.11.0"
 
 [[deps.TestItems]]
-git-tree-sha1 = "8621ba2637b49748e2dc43ba3d84340be2938022"
+git-tree-sha1 = "42fd9023fef18b9b78c8343a4e2f3813ffbcefcb"
 uuid = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
-version = "0.1.1"
+version = "1.0.0"
 
 [[deps.TranscodingStreams]]
 git-tree-sha1 = "e84b3a11b9bece70d14cce63406bbc79ed3464d2"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.11.2"
+
+[[deps.Trapz]]
+git-tree-sha1 = "79eb0ed763084a3e7de81fe1838379ac6a23b6a0"
+uuid = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
+version = "2.0.3"
 
 [[deps.Tricks]]
 git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
@@ -1844,35 +1935,42 @@ version = "1.4.1+1"
 # ╟─24202850-e8fa-4172-91f9-d31ad67e0d3e
 # ╠═c18b8343-1911-4864-918f-2083637524d7
 # ╠═72b526a6-6e22-40a1-ac76-8f766681ff87
+# ╟─7027914f-2195-472e-968e-c5e587b84dba
+# ╟─c1940fde-3164-40e7-8679-c16e872c38b8
+# ╟─b18ed62a-9b12-467d-b289-7720a45817d3
+# ╠═d4efcd42-14e6-46f0-85b7-0c917b09e7a1
 # ╟─ea84b823-a39d-455c-be84-fe9dce10c4d8
 # ╟─7ee8f5de-12d7-4dac-8933-a319ee6ed77a
 # ╟─e5aedbda-67e9-465e-91f1-10125bee8dc0
 # ╟─f9e5b61b-330d-40ee-8667-7af9012a6f62
 # ╟─5fd21ecd-80ab-4d7f-ad64-cb33a399c289
 # ╟─dd52ea0b-db95-4d07-8d12-cea548508033
+# ╟─04514294-71e6-4185-b5a0-35eb09066e6f
+# ╟─14f768ba-30e1-4fbb-ba80-70065873a830
+# ╟─dbcd0df8-c2ee-4ba0-bcb5-75fe898b6f0f
+# ╟─5a27e717-91ff-4d60-9e57-d32330121090
+# ╟─fb3f40bf-4b4b-4992-9eb7-667d8b12fe64
+# ╟─23095d73-0957-450e-8537-72431506fd4d
+# ╟─b2529e4f-a312-4adc-adf2-3f1f70a7b35f
 # ╟─bb81d137-effe-4107-a61b-fd529cff8421
 # ╟─813427fb-7d88-44f3-b118-2d5b94031a50
+# ╟─4d8bfae0-2eda-462b-a9ec-c0082097305d
 # ╟─e3e99ddc-36ea-4b53-bb07-753670a013db
 # ╟─12fa8a68-6fed-4d1f-ac71-864ca078c5a7
+# ╟─6a7e36c3-f441-46e5-8070-906ee366260d
+# ╟─b188c630-5beb-40e3-9b92-260b385fc295
 # ╟─e8345099-906f-4965-bd3b-1d3f80eb2250
 # ╠═a8fc4634-018b-4633-85b3-fb0ba639a49a
 # ╟─53c3949d-6e77-4606-8882-db4a798eed2c
-# ╠═bdc485f2-c99c-4383-b62e-cbafd4905a3a
-# ╠═2e697f1e-9735-4e19-9a41-b614ca00ee30
-# ╠═130657ad-3798-4f09-9d7d-14a64becc275
-# ╟─c583a2da-c662-4f5e-81e3-358bf2b02313
+# ╟─9fa845c7-dd1e-40ea-9cd9-6126783aad94
 # ╟─da89afa4-43bc-4906-b01b-9f6ec455f229
 # ╟─025fed74-93a2-4bb9-96b6-9e4c1a00c75d
-# ╟─f45236fa-2dbf-4351-8fc5-b785a2093c66
-# ╟─e1784ad4-cd61-487d-ba87-00c0d137250b
-# ╟─f099e041-cf69-42ee-824a-716671b644b3
-# ╟─a3b15f2f-95f6-48a5-a6af-0719ddeb91cd
-# ╠═f3f18145-5a3f-4929-8041-5769daf46d8c
-# ╠═e4ebec31-d3b6-46ff-911f-05d7e16ed9e3
-# ╠═098f69ac-a0d4-4f3f-b9d1-e8c860bef94f
-# ╠═6fd98dd1-efca-4d7a-a9ad-c56dae973ab4
-# ╟─40608ffb-14da-4643-8f86-86f20c93001a
+# ╟─681ecbaa-1370-468a-b3d8-7f01b373b3f6
+# ╟─d904f54e-e284-46bb-b7a6-9fae79e01300
+# ╟─5edbb407-3655-45f6-aa9b-8fae111b2eee
+# ╟─4f68effa-b334-4c85-b462-d5c6554e7ea3
 # ╟─6da7221d-55be-41c2-b74d-00e993d299f6
+# ╠═dff61cee-c2c4-41aa-8fc1-fbac08a67beb
 # ╠═3bac1a1e-9bb1-4125-9b58-2bd43d959fa9
 # ╠═b622c2a7-6e74-4b49-9e11-ad5b78508cd9
 # ╠═04a3248a-9705-4c0f-bb44-5647fff61e81
@@ -1880,5 +1978,7 @@ version = "1.4.1+1"
 # ╠═d44450c2-fff7-4c4d-8231-57baab6cc404
 # ╠═229dec7b-d92c-4c74-8a9f-fe21c3b0fb0d
 # ╠═f8129573-5a9f-4989-a9f4-16659ef9b9af
+# ╠═96e27383-8c0b-4b95-b7fb-80bb97f390bb
+# ╠═5275bb7b-944d-4c25-a46d-44bda09d07e1
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
