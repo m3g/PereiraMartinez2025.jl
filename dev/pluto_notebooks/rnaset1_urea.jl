@@ -50,7 +50,7 @@ In [Lin & Timasheff, Biochemistry, 1994](https://pubs.acs.org/doi/10.1021/bi0020
 md"### Properties of aqueous solutions of urea"
 
 # ╔═╡ 6f3ec99b-15b1-4014-b146-09e29864382c
-md"Experimental data for urea aqueous solutions (28$^\circ$C):"
+md"Experimental data for urea aqueous solutions (25$^\circ$C):"
 
 # ╔═╡ 8293f49a-57a1-49b5-a2da-95a43b4cd097
 urea_data = DataFrame(
@@ -149,6 +149,11 @@ M3 = 60.06u"g/mol"
 
 # ╔═╡ 5fd21ecd-80ab-4d7f-ad64-cb33a399c289
 M2 = 11000u"g/mol"
+
+# ╔═╡ 393619ed-b57c-462a-83fa-e03cff2f1663
+md"""
+The RNase-T1 and RCM-T1 constructos of the article, modeling the native and denatured states of RNase-T1, will be named from now on **N** and **U** states, respectively. 
+"""
 
 # ╔═╡ dd52ea0b-db95-4d07-8d12-cea548508033
 md"### Converting concentrations:"
@@ -1910,6 +1915,7 @@ version = "1.4.1+1"
 # ╟─e5aedbda-67e9-465e-91f1-10125bee8dc0
 # ╟─f9e5b61b-330d-40ee-8667-7af9012a6f62
 # ╟─5fd21ecd-80ab-4d7f-ad64-cb33a399c289
+# ╟─393619ed-b57c-462a-83fa-e03cff2f1663
 # ╟─dd52ea0b-db95-4d07-8d12-cea548508033
 # ╟─04514294-71e6-4185-b5a0-35eb09066e6f
 # ╟─14f768ba-30e1-4fbb-ba80-70065873a830
