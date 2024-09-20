@@ -4,6 +4,15 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 96e27383-8c0b-4b95-b7fb-80bb97f390bb
+import Pkg
+
+# ╔═╡ 0b04d8cc-36e6-4069-8f48-e2c4058f2839
+using Latexify
+
+# ╔═╡ dff61cee-c2c4-41aa-8fc1-fbac08a67beb
+using Trapz
+
 # ╔═╡ 3bac1a1e-9bb1-4125-9b58-2bd43d959fa9
 using MolSimToolkit
 
@@ -29,28 +38,28 @@ begin
 end
 
 # ╔═╡ 6edcdced-5fb5-41f4-a741-27c98dcbd1b4
-md"# Computing the free energy of transfer"
+md"# BdpA transfer free energy to urea"
 
 # ╔═╡ 3b976cdf-09d2-4c43-881c-c1eadb4ea238
-md"## Aqueous solutions of TMAO"
+md"## Aqueous solutions of urea: experimental data"
 
 # ╔═╡ 19208b6e-7039-11ef-2685-c9fd57102877
 md"""
-In Lin & Timasheff (Biochemistry 1994, 13, 12695), the activity coefficients ($\gamma_3$) of TMAO in aqueous solutions and the corresponding densities are provided. The data provided is that of $\gamma_3$ as a function of the concentration $m_3$ (in mol/kg):
+In [Lin & Timasheff, Biochemistry, 1994](https://pubs.acs.org/doi/10.1021/bi00208a021), the activity coefficients ($\gamma_3$) of urea in aqueous solutions and the corresponding densities are provided. The data provided is that of $\gamma_3$ as a function of the concentration $m_3$ (in mol/kg):
 
 """
 
 # ╔═╡ 77c25151-8673-4ec1-9687-80f1fceb4e5c
-md"### Properties of aqueous solutions of TMAO"
+md"### Properties of aqueous solutions of urea"
 
 # ╔═╡ 6f3ec99b-15b1-4014-b146-09e29864382c
-md"Experimental data for TMAO aqueous solutions (28$^\circ$C):"
+md"Experimental data for urea aqueous solutions (28$^\circ$C):"
 
 # ╔═╡ 8293f49a-57a1-49b5-a2da-95a43b4cd097
-tmao_data = DataFrame(
-	:m₃ => [0.0, 0.25, 0.52, 1.08]u"mol/kg",
-	:γ₃ => [1.0, 0.992, 0.965, 0.883],
-	:ρ₀ => [0.996232, 1.0029, 1.0034, 1.0058]u"g/mL",
+urea_data = DataFrame(
+	:m₃ => [0.0, 0.51, 1.05, 2.20]u"mol/kg",
+	:γ₃ => [1.0, 0.960, 0.924, 0.859],
+	:ρ₀ => [0.9970, 1.0084, 1.0160, 1.0298]u"g/mL",
 )
 
 # ╔═╡ 1ca88373-114c-464d-aaac-9f3b25893820
@@ -60,14 +69,16 @@ The data above is used to compute the $(\partial\ln\gamma_3/\partial m_3)$ quant
 
 # ╔═╡ 90ad306d-163e-4fb3-a00e-6b86c32900f9
 begin
-scatter(MolSimStyle,
-	tmao_data[!,:m₃], log.(tmao_data[!,:γ₃]),
-	xlabel=L"m_3", ylabel=L"\ln(\gamma_3)", label="TMAO", color=:red,
+p0 = scatter(MolSimStyle,
+	urea_data[!,:m₃], log.(urea_data[!,:γ₃]),
+	xlabel=L"m_3", ylabel=L"\ln(\gamma_3)", label="urea", color=:blue,
 )
-plot!(
-	tmao_data[!,:m₃], log.(tmao_data[!,:γ₃]); 
-	label=nothing, color=:red,
+plot!(p0,
+	urea_data[!,:m₃], log.(urea_data[!,:γ₃]); 
+	label=nothing, color=:blue,
 )
+plot!(p0, size=(400,300))
+p0
 end
 
 # ╔═╡ 357f0851-8ba2-4dbe-9c49-e5bd15f3f93b
@@ -76,13 +87,13 @@ The shape of the plot suggests that a quadratic fit will capture precisely the t
 """
 
 # ╔═╡ e30af672-9c42-4d19-8b5b-dbf1dc0d9680
-tmao_fit = fitquadratic(ustrip(tmao_data[!,:m₃]),log.(tmao_data[!,:γ₃]))
+urea_fit = fitquadratic(urea_data[!,:m₃],log.(urea_data[!,:γ₃]))
 
 # ╔═╡ c08a180a-e8cf-4f02-9451-1d40fb96a653
 md"The derivative of the logarithmic of the activity coefficient as a function of the molality is, then, the derivative of the above quadratic fit:"
 
 # ╔═╡ f9ec92d4-4ab4-4a9c-b240-7fe5d28e0018
-∂lnγ₃∂m₃(m₃) = (2 * tmao_fit.a * ustrip(m₃) + tmao_fit.b) / (oneunit(m₃))
+∂lnγ₃∂m₃(m₃) = 2 * urea_fit.a * m₃ + urea_fit.b
 
 # ╔═╡ 24202850-e8fa-4172-91f9-d31ad67e0d3e
 md"""
@@ -90,13 +101,37 @@ Which can be computed for the concentrations given in Table 2 of the article, an
 """
 
 # ╔═╡ c18b8343-1911-4864-918f-2083637524d7
-tmao_data[:, :∂lnγ₃∂m₃] = ∂lnγ₃∂m₃.(tmao_data[!,:m₃])
+urea_data[:, :∂lnγ₃∂m₃] = ∂lnγ₃∂m₃.(urea_data[!,:m₃])
 
 # ╔═╡ 72b526a6-6e22-40a1-ac76-8f766681ff87
-tmao_data
+urea_data
+
+# ╔═╡ 7027914f-2195-472e-968e-c5e587b84dba
+md"We also obtain an expression for the density as a function of the concentration, in mol/L:"
+
+# ╔═╡ c1940fde-3164-40e7-8679-c16e872c38b8
+begin
+	# convert concentration to mol/L
+	c3 = uconvert.(u"mol/L", urea_data[!,:m₃] .* urea_data[!,:ρ₀])
+	p1 = scatter(MolSimStyle, 
+		c3, urea_data[!,:ρ₀],
+		label=:none,
+	    xlabel=L"c_3", ylabel=L"\rho_0", color=:blue,
+	)
+	density_fit = fitquadratic(c3, urea_data[!,:ρ₀])
+	plot!(p1, density_fit.x, density_fit.y, label=:none, color=:blue)
+	plot!(p1, size=(400,300))
+	p1
+end
+
+# ╔═╡ b18ed62a-9b12-467d-b289-7720a45817d3
+md"Where the fit is:"
+
+# ╔═╡ d4efcd42-14e6-46f0-85b7-0c917b09e7a1
+density_fit
 
 # ╔═╡ ea84b823-a39d-455c-be84-fe9dce10c4d8
-md"## RNaseT1 in TMAO (validation)"
+md"## BdpA in urea"
 
 # ╔═╡ 7ee8f5de-12d7-4dac-8933-a319ee6ed77a
 md"""
@@ -110,100 +145,150 @@ $$\left(\frac{\partial\mu_2}{\partial m_3}\right)_{T,P,m_2} =
 """
 
 # ╔═╡ e5aedbda-67e9-465e-91f1-10125bee8dc0
-md"where, in the case of TMAO (species 3) and SH3 (solute, species 2) we have:"
+md"where, in the case of urea (species 3) and BpdA (solute, species 2) we have:"
 
 # ╔═╡ f9e5b61b-330d-40ee-8667-7af9012a6f62
-M3 = 75.10966u"g/mol"
+M3 = 60.06u"g/mol"
 
 # ╔═╡ 5fd21ecd-80ab-4d7f-ad64-cb33a399c289
-M2 = 11200u"g/mol"
+M2 = 6768.46u"g/mol"
 
 # ╔═╡ dd52ea0b-db95-4d07-8d12-cea548508033
-md"### Experimental preferential interaction parameters"
+md"### Converting concentrations:"
+
+# ╔═╡ 04514294-71e6-4185-b5a0-35eb09066e6f
+md"For the N and U states, the obtained bulk concentrations of urea are obtained from the simulations:"
+
+
+# ╔═╡ 14f768ba-30e1-4fbb-ba80-70065873a830
+c = DataFrame(
+    "N" => [0.0938442, 0.199496, 0.29125,  0.397743, 0.49524 ]u"mol/L",
+	"U" => [0.0972688, 0.200396, 0.305921, 0.401483, 0.501656]u"mol/L",
+)
+
+# ╔═╡ dbcd0df8-c2ee-4ba0-bcb5-75fe898b6f0f
+md"The densities corresponding to these concentrations, according to the experimental densities, are:"
+
+# ╔═╡ 5a27e717-91ff-4d60-9e57-d32330121090
+ρ = DataFrame(
+	"N" => density_fit.(c[!,"N"]),
+	"U" => density_fit.(c[!,"U"]),
+)
+
+# ╔═╡ fb3f40bf-4b4b-4992-9eb7-667d8b12fe64
+md"With which we can compute the molality of urea in each simulated concentration:"
+
+# ╔═╡ 23095d73-0957-450e-8537-72431506fd4d
+simulated_m₃ = DataFrame(
+	"N" => uconvert.(u"mol/kg", c[!,"N"] ./ ρ[!,"N"]),
+	"U" => uconvert.(u"mol/kg", c[!,"U"] ./ ρ[!,"U"]),
+)
+
+# ╔═╡ b2529e4f-a312-4adc-adf2-3f1f70a7b35f
+md"### Simulated preferential interactions:"
 
 # ╔═╡ bb81d137-effe-4107-a61b-fd529cff8421
-md"The preferential interaction parameters obtained for the native state, in our simulations, as a function of the TMAO concentration, are:"
+md"The preferential interaction parameters of BpDA in urea, for the N and U states, are (converted from mol/mol to g/g):"
 
 # ╔═╡ 813427fb-7d88-44f3-b118-2d5b94031a50
-∂g₃∂g₂ = [ 0.0008, -0.0096, -0.0450 ]
+∂g₃∂g₂ = DataFrame(
+	"N" => [ 0.819482, 1.25926, 1.78542, 2.35528, 2.901680 ] / (M2/M3),
+	"U" => [0.469901,   1.43146,    2.24178,    2.71291, 3.41588 ] / (M2/M3),
+)
+
+# ╔═╡ 4d8bfae0-2eda-462b-a9ec-c0082097305d
+begin
+	p3 = scatter(MolSimStyle,
+		simulated_m₃[!,"N"], ∂g₃∂g₂[!,"N"], label="N",
+		xlabel=L"m_3", ylabel=L"\partial g_2\partial g_3 \mathrm{(g/g)}",
+	)
+	scatter!(p3,
+		simulated_m₃[!,"U"], ∂g₃∂g₂[!,"U"], label="U",
+	)
+	plot!(p3, size=(400,300))
+end
 
 # ╔═╡ e3e99ddc-36ea-4b53-bb07-753670a013db
-md"And using the gas constant in cal/(K mol):"
+md"And using the gas constant in kcal/(K mol), and the temperature in K:"
 
 # ╔═╡ 12fa8a68-6fed-4d1f-ac71-864ca078c5a7
-R = 1.98720425864083u"cal/(K*mol)"
+R = 1.9872036e-3u"kcal/(K*mol)"
+
+# ╔═╡ 6a7e36c3-f441-46e5-8070-906ee366260d
+T = 298u"K"
+
+# ╔═╡ b188c630-5beb-40e3-9b92-260b385fc295
+md"### The transfer free energy"
 
 # ╔═╡ e8345099-906f-4965-bd3b-1d3f80eb2250
 md"We can define Eq. 5 of the article (written above), as a function of the preferential interactions, molar mass of the cossolvent, and ∂lnγ₃∂m₃:"
 
 # ╔═╡ a8fc4634-018b-4633-85b3-fb0ba639a49a
-∂μ₃∂m₃(∂g₃∂g₂, m₃, ∂lnγ₃∂m₃,M2,M3) = 
-	-(∂g₃∂g₂) * (R * (28+273)u"K" * M2 / M3) * (1/m₃ + ∂lnγ₃∂m₃)
+∂μ₂∂m₃(∂g₃∂g₂, m₃, M2, M3) = -(∂g₃∂g₂) * (R * T * M2 / M3) * (1/m₃ + ∂lnγ₃∂m₃(m₃))
 
 # ╔═╡ 53c3949d-6e77-4606-8882-db4a798eed2c
 md"Applying this equation to the three possible sets of parameters for the three concentrations studied in the paper, we get:"
 
-# ╔═╡ bdc485f2-c99c-4383-b62e-cbafd4905a3a
-v1 = ∂μ₃∂m₃(∂g₃∂g₂[1], 0.25u"mol/kg", tmao_data[2,:∂lnγ₃∂m₃],M2,M3)
-
-# ╔═╡ 2e697f1e-9735-4e19-9a41-b614ca00ee30
-v2 = ∂μ₃∂m₃(∂g₃∂g₂[2], 0.52u"mol/kg", tmao_data[3,:∂lnγ₃∂m₃],M2,M3)
-
-# ╔═╡ 130657ad-3798-4f09-9d7d-14a64becc275
-v3 = ∂μ₃∂m₃(∂g₃∂g₂[3], 1.08u"mol/kg", tmao_data[4,:∂lnγ₃∂m₃],M2,M3)
-
-# ╔═╡ c583a2da-c662-4f5e-81e3-358bf2b02313
-md"""
-The values above are reasonably consistent with the reported -283, 1495 and 2973 cal/mol$^2$ of the paper.
-"""
+# ╔═╡ 9fa845c7-dd1e-40ea-9cd9-6126783aad94
+∂μ₂∂m₃_sim = DataFrame(
+    "N" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"N"], simulated_m₃[!,"N"], M2, M3),
+	"U" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"U"], simulated_m₃[!,"U"], M2, M3),
+)
 
 # ╔═╡ da89afa4-43bc-4906-b01b-9f6ec455f229
 md"""
-Now we can plot those values as function of the concentration of TMAO:
+Now we can plot those values as function of the concentration of urea:
 """
 
 # ╔═╡ 025fed74-93a2-4bb9-96b6-9e4c1a00c75d
 begin
-	scatter(tmao_data[2:4,:m₃], [v1,v2,v3] ./ 1000;
-	    xlabel=L"$m_3$", ylabel=L"\partial\mu_2 / \partial m_3",
-		label=nothing,
+	p2 = scatter(MolSimStyle,
+		simulated_m₃[!,"N"], ∂μ₂∂m₃_sim[!,"N"], label="N",
+		xlabel=L"m_3", ylabel=L"\partial\mu_2\partial m_3",
+		color=:blue,
 	)
-	f = fitlinear(ustrip.(tmao_data[2:4,:m₃]), ustrip.([v1,v2,v3] ./ 1000))
-	plot!(f.x,f.y; label=nothing, color=:blue)
-	plot!(xlims=[0,1.2], ylims=[-1,4])
+	plot!(p2, 
+		simulated_m₃[!,"N"], ∂μ₂∂m₃_sim[!,"N"], label=nothing,
+		fillrange=(0:0.5), fc=:blue, alpha=0.1, 
+	)
+	scatter!(p2,
+		simulated_m₃[!,"U"], ∂μ₂∂m₃_sim[!,"U"], label="U",
+		color=:orange,
+	)
+	plot!(p2, 
+		simulated_m₃[!,"U"], ∂μ₂∂m₃_sim[!,"U"], label=nothing,
+		fillrange=(0:0.5), fc=:orange, alpha=0.1, 
+	)
+	plot!(p2, size=(400,300))
 end
 
-# ╔═╡ f45236fa-2dbf-4351-8fc5-b785a2093c66
+# ╔═╡ 681ecbaa-1370-468a-b3d8-7f01b373b3f6
 md"""
-And this plot corresponds to Figure 4 of the article (open squares).
+The shaded areas are, qualitatively, the transfer free energy of each state up to each concentration. 
+
+The plot shows that at very low concentrations, the native state has a lower transfer free energy to urea than the denatured state. Thus, at this low concentration, the native state is stabilized in urea relative to the denatured state. 
+
+At higher urea concentrations the integral associated to the denatured state becomes progressively more negative, thus the denatured state is stabilized relative to the native state upon transfer to a urea solution. 
+
+Integrating these curves provides a qualitative measure of the free energy of transfer in each case:
 """
 
-# ╔═╡ e1784ad4-cd61-487d-ba87-00c0d137250b
-md"The line above was, then fitted by a line:"
+# ╔═╡ d904f54e-e284-46bb-b7a6-9fae79e01300
+Δμ₂_N = trapz(simulated_m₃[!,"N"],∂μ₂∂m₃_sim[!,"N"])
 
-# ╔═╡ f099e041-cf69-42ee-824a-716671b644b3
-tmao_fit2 = fitlinear(ustrip.(tmao_data[2:4,:m₃]), ustrip.([v1,v2,v3]))
+# ╔═╡ 5edbb407-3655-45f6-aa9b-8fae111b2eee
+Δμ₂_U = trapz(simulated_m₃[!,"U"],∂μ₂∂m₃_sim[!,"U"])
 
-# ╔═╡ a3b15f2f-95f6-48a5-a6af-0719ddeb91cd
-md"And we have, now the integral of this line computed from zero to each concentration:"
-
-# ╔═╡ f3f18145-5a3f-4929-8041-5769daf46d8c
-int(m₃, fit) = (fit.a/2)*ustrip(m₃)^2 + fit.b*ustrip(m₃)
-
-# ╔═╡ e4ebec31-d3b6-46ff-911f-05d7e16ed9e3
-int(tmao_data[2,:m₃], tmao_fit2)
-
-# ╔═╡ 098f69ac-a0d4-4f3f-b9d1-e8c860bef94f
-int(tmao_data[3,:m₃], tmao_fit2)
-
-# ╔═╡ 6fd98dd1-efca-4d7a-a9ad-c56dae973ab4
-int(tmao_data[4,:m₃], tmao_fit2)
-
-# ╔═╡ 40608ffb-14da-4643-8f86-86f20c93001a
-md"This last value is the one corresponding to the 1197 cal/mol reported for 1M TMAO in Table 5 of the article."
+# ╔═╡ 4f68effa-b334-4c85-b462-d5c6554e7ea3
+md"""
+Implying the the denatured state is slightly more favorably transfered to a 0.5 mol/L aqueous urea solution than the native state. The difference probably increases with increasing urea concentration.
+"""
 
 # ╔═╡ 6da7221d-55be-41c2-b74d-00e993d299f6
 md"### Packages used"
+
+# ╔═╡ 5275bb7b-944d-4c25-a46d-44bda09d07e1
+Pkg.status()
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -211,18 +296,23 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 EasyFit = "fde71243-0cda-4261-b7c7-4845bd106b21"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
 MolSimToolkit = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+Trapz = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 DataFrames = "~1.6.1"
 EasyFit = "~0.6.6"
 LaTeXStrings = "~1.3.1"
+Latexify = "~0.16.5"
 MolSimToolkit = "~1.18.1"
 Plots = "~1.40.8"
 PlutoUI = "~0.7.60"
+Trapz = "~2.0.3"
 Unitful = "~1.21.0"
 """
 
@@ -230,9 +320,9 @@ Unitful = "~1.21.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.0-rc3"
+julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "f4dcfd538520c8ac6ba7d903f51e1312568c0e4a"
+project_hash = "462273a7e4f1e29a79507a57ad862077f68deb15"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -258,7 +348,7 @@ version = "1.1.3"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
-version = "1.1.2"
+version = "1.1.1"
 
 [[deps.ArrayInterface]]
 deps = ["Adapt", "LinearAlgebra"]
@@ -292,17 +382,15 @@ version = "7.16.0"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
-version = "1.11.0"
 
 [[deps.AtomsBase]]
 deps = ["LinearAlgebra", "PeriodicTable", "Printf", "Requires", "StaticArrays", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "0fa9318ceff45a514bd1dbed7563b32ae2cdb73f"
+git-tree-sha1 = "aab46de4a22e3619fe0167a18019b94a65033bd7"
 uuid = "a963bdd2-2df7-4f54-a1ee-49d51e6be12a"
-version = "0.4.1"
+version = "0.4.2"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
-version = "1.11.0"
 
 [[deps.BitFlags]]
 git-tree-sha1 = "0691e34b3bb8be9307330f88d1a3c3f25466c24d"
@@ -456,7 +544,6 @@ version = "1.0.0"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
-version = "1.11.0"
 
 [[deps.Dbus_jll]]
 deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl"]
@@ -485,7 +572,6 @@ version = "1.15.1"
 [[deps.Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
-version = "1.11.0"
 
 [[deps.Distributions]]
 deps = ["AliasTables", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
@@ -515,10 +601,10 @@ uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 version = "1.6.0"
 
 [[deps.EasyFit]]
-deps = ["LsqFit", "Parameters", "Statistics", "TestItems"]
-git-tree-sha1 = "861981a1edab282ff101e9f393cf961375f6be27"
+deps = ["LsqFit", "Parameters", "Statistics", "TestItems", "Unitful"]
+git-tree-sha1 = "46097864204031cdf46d52f22cc8bf894c995cea"
 uuid = "fde71243-0cda-4261-b7c7-4845bd106b21"
-version = "0.6.6"
+version = "0.6.8"
 
     [deps.EasyFit.extensions]
     SplineFitExt = "Interpolations"
@@ -558,7 +644,6 @@ version = "4.4.4+1"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
-version = "1.11.0"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra"]
@@ -630,7 +715,6 @@ version = "1.0.14+0"
 [[deps.Future]]
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
-version = "1.11.0"
 
 [[deps.GLFW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll", "libdecor_jll", "xkbcommon_jll"]
@@ -725,7 +809,6 @@ version = "1.4.2"
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-version = "1.11.0"
 
 [[deps.InvertedIndices]]
 git-tree-sha1 = "0dc7b50b8d436461be01300fd8cd45aa0274b038"
@@ -780,9 +863,9 @@ version = "3.0.0+1"
 
 [[deps.LLVMOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "e16271d212accd09d52ee0ae98956b8a05c4b626"
+git-tree-sha1 = "78211fb6cbc872f77cad3fc0b6cf647d923f4929"
 uuid = "1d63c593-3942-5779-bab2-d838dc0a180e"
-version = "17.0.6+0"
+version = "18.1.7+0"
 
 [[deps.LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -819,17 +902,16 @@ version = "0.6.4"
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.6.0+0"
+version = "8.4.0+0"
 
 [[deps.LibGit2]]
 deps = ["Base64", "LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
-version = "1.11.0"
 
 [[deps.LibGit2_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll"]
 uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
-version = "1.7.2+0"
+version = "1.6.4+0"
 
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
@@ -838,7 +920,6 @@ version = "1.11.0+1"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
-version = "1.11.0"
 
 [[deps.Libffi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -891,7 +972,6 @@ version = "2.40.1+0"
 [[deps.LinearAlgebra]]
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-version = "1.11.0"
 
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
@@ -911,7 +991,6 @@ version = "0.3.28"
 
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
-version = "1.11.0"
 
 [[deps.LoggingExtras]]
 deps = ["Dates", "Logging"]
@@ -939,7 +1018,6 @@ version = "0.5.13"
 [[deps.Markdown]]
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
-version = "1.11.0"
 
 [[deps.MbedTLS]]
 deps = ["Dates", "MbedTLS_jll", "MozillaCACerts_jll", "NetworkOptions", "Random", "Sockets"]
@@ -950,7 +1028,7 @@ version = "1.1.9"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
-version = "2.28.6+0"
+version = "2.28.2+1"
 
 [[deps.Measures]]
 git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
@@ -965,7 +1043,6 @@ version = "1.2.0"
 
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
-version = "1.11.0"
 
 [[deps.MolSimToolkit]]
 deps = ["AtomsBase", "CellListMap", "Chemfiles", "DocStringExtensions", "EasyFit", "LaTeXStrings", "LinearAlgebra", "OffsetArrays", "PDBTools", "ProgressMeter", "ProteinSecondaryStructures", "Reexport", "StaticArrays", "Statistics", "StatsBase", "TestItems"]
@@ -979,7 +1056,7 @@ weakdeps = ["Plots"]
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2023.12.12"
+version = "2023.1.10"
 
 [[deps.NLSolversBase]]
 deps = ["DiffResults", "Distributed", "FiniteDiff", "ForwardDiff"]
@@ -1015,7 +1092,7 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.27+1"
+version = "0.3.23+4"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1104,13 +1181,9 @@ uuid = "30392449-352a-5448-841d-b1acce4e97dc"
 version = "0.43.4+0"
 
 [[deps.Pkg]]
-deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
+deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.11.0"
-weakdeps = ["REPL"]
-
-    [deps.Pkg.extensions]
-    REPLExt = "REPL"
+version = "1.10.0"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1177,7 +1250,6 @@ version = "2.3.2"
 [[deps.Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
-version = "1.11.0"
 
 [[deps.ProgressMeter]]
 deps = ["Distributed", "Printf"]
@@ -1222,9 +1294,9 @@ version = "6.7.1+1"
 
 [[deps.QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
-git-tree-sha1 = "1d587203cf851a51bf1ea31ad7ff89eff8d625ea"
+git-tree-sha1 = "cda3b045cf9ef07a08ad46731f5a3165e56cf3da"
 uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
-version = "2.11.0"
+version = "2.11.1"
 
     [deps.QuadGK.extensions]
     QuadGKEnzymeExt = "Enzyme"
@@ -1233,14 +1305,12 @@ version = "2.11.0"
     Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 
 [[deps.REPL]]
-deps = ["InteractiveUtils", "Markdown", "Sockets", "StyledStrings", "Unicode"]
+deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
-version = "1.11.0"
 
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-version = "1.11.0"
 
 [[deps.RecipesBase]]
 deps = ["PrecompileTools"]
@@ -1273,15 +1343,15 @@ version = "1.3.0"
 
 [[deps.Rmath]]
 deps = ["Random", "Rmath_jll"]
-git-tree-sha1 = "f65dcb5fa46aee0cf9ed6274ccbd597adc49aa7b"
+git-tree-sha1 = "852bd0f55565a9e973fcfee83a84413270224dc4"
 uuid = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
-version = "0.7.1"
+version = "0.8.0"
 
 [[deps.Rmath_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "e60724fd3beea548353984dc61c943ecddb0e29a"
+git-tree-sha1 = "58cdd8fb2201a6267e1db87ff148dd6c1dbd8ad8"
 uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
-version = "0.4.3+0"
+version = "0.5.1+0"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -1307,7 +1377,6 @@ version = "1.4.5"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
-version = "1.11.0"
 
 [[deps.Setfield]]
 deps = ["ConstructionBase", "Future", "MacroTools", "StaticArraysCore"]
@@ -1322,13 +1391,12 @@ uuid = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
 version = "1.0.3"
 
 [[deps.SimpleBufferStream]]
-git-tree-sha1 = "874e8867b33a00e784c8a7e4b60afe9e037b74e1"
+git-tree-sha1 = "f305871d2f381d21527c770d4788c06c097c9bc1"
 uuid = "777ac1f9-54b0-4bf8-805c-2214025038e7"
-version = "1.1.0"
+version = "1.2.0"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
-version = "1.11.0"
 
 [[deps.SortingAlgorithms]]
 deps = ["DataStructures"]
@@ -1339,7 +1407,7 @@ version = "1.2.1"
 [[deps.SparseArrays]]
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-version = "1.11.0"
+version = "1.10.0"
 
 [[deps.SpecialFunctions]]
 deps = ["IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
@@ -1373,14 +1441,9 @@ uuid = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
 version = "1.4.3"
 
 [[deps.Statistics]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "ae3bb1eb3bba077cd276bc5cfc337cc65c3075c0"
+deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-version = "1.11.1"
-weakdeps = ["SparseArrays"]
-
-    [deps.Statistics.extensions]
-    SparseArraysExt = ["SparseArrays"]
+version = "1.10.0"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
@@ -1396,9 +1459,9 @@ version = "0.34.3"
 
 [[deps.StatsFuns]]
 deps = ["HypergeometricFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
-git-tree-sha1 = "cef0472124fab0695b58ca35a77c6fb942fdab8a"
+git-tree-sha1 = "b423576adc27097764a90e163157bcfc9acf0f46"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "1.3.1"
+version = "1.3.2"
 
     [deps.StatsFuns.extensions]
     StatsFunsChainRulesCoreExt = "ChainRulesCore"
@@ -1414,10 +1477,6 @@ git-tree-sha1 = "a04cabe79c5f01f4d723cc6704070ada0b9d46d5"
 uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
 version = "0.3.4"
 
-[[deps.StyledStrings]]
-uuid = "f489334b-da3d-4c2e-b8f0-e476e12c162b"
-version = "1.11.0"
-
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
@@ -1425,7 +1484,7 @@ uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 [[deps.SuiteSparse_jll]]
 deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
-version = "7.7.0+0"
+version = "7.2.1+1"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -1458,17 +1517,21 @@ version = "0.1.1"
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-version = "1.11.0"
 
 [[deps.TestItems]]
-git-tree-sha1 = "8621ba2637b49748e2dc43ba3d84340be2938022"
+git-tree-sha1 = "42fd9023fef18b9b78c8343a4e2f3813ffbcefcb"
 uuid = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
-version = "0.1.1"
+version = "1.0.0"
 
 [[deps.TranscodingStreams]]
 git-tree-sha1 = "e84b3a11b9bece70d14cce63406bbc79ed3464d2"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.11.2"
+
+[[deps.Trapz]]
+git-tree-sha1 = "79eb0ed763084a3e7de81fe1838379ac6a23b6a0"
+uuid = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
+version = "2.0.3"
 
 [[deps.Tricks]]
 git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
@@ -1483,7 +1546,6 @@ version = "1.5.1"
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
-version = "1.11.0"
 
 [[deps.UnPack]]
 git-tree-sha1 = "387c1f73762231e86e0c9c5443ce3b4a0a9a0c2b"
@@ -1492,7 +1554,6 @@ version = "1.0.2"
 
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
-version = "1.11.0"
 
 [[deps.UnicodeFun]]
 deps = ["REPL"]
@@ -1802,7 +1863,7 @@ version = "1.1.6+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.59.0+0"
+version = "1.52.0+1"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1834,45 +1895,53 @@ version = "1.4.1+1"
 # ╟─19208b6e-7039-11ef-2685-c9fd57102877
 # ╟─77c25151-8673-4ec1-9687-80f1fceb4e5c
 # ╟─6f3ec99b-15b1-4014-b146-09e29864382c
+# ╠═0b04d8cc-36e6-4069-8f48-e2c4058f2839
 # ╟─8293f49a-57a1-49b5-a2da-95a43b4cd097
 # ╟─1ca88373-114c-464d-aaac-9f3b25893820
 # ╟─90ad306d-163e-4fb3-a00e-6b86c32900f9
 # ╟─357f0851-8ba2-4dbe-9c49-e5bd15f3f93b
-# ╟─e30af672-9c42-4d19-8b5b-dbf1dc0d9680
+# ╠═e30af672-9c42-4d19-8b5b-dbf1dc0d9680
 # ╟─c08a180a-e8cf-4f02-9451-1d40fb96a653
 # ╠═f9ec92d4-4ab4-4a9c-b240-7fe5d28e0018
 # ╟─24202850-e8fa-4172-91f9-d31ad67e0d3e
-# ╠═c18b8343-1911-4864-918f-2083637524d7
+# ╟─c18b8343-1911-4864-918f-2083637524d7
 # ╠═72b526a6-6e22-40a1-ac76-8f766681ff87
+# ╟─7027914f-2195-472e-968e-c5e587b84dba
+# ╟─c1940fde-3164-40e7-8679-c16e872c38b8
+# ╟─b18ed62a-9b12-467d-b289-7720a45817d3
+# ╠═d4efcd42-14e6-46f0-85b7-0c917b09e7a1
 # ╟─ea84b823-a39d-455c-be84-fe9dce10c4d8
 # ╟─7ee8f5de-12d7-4dac-8933-a319ee6ed77a
 # ╟─e5aedbda-67e9-465e-91f1-10125bee8dc0
 # ╟─f9e5b61b-330d-40ee-8667-7af9012a6f62
 # ╟─5fd21ecd-80ab-4d7f-ad64-cb33a399c289
 # ╟─dd52ea0b-db95-4d07-8d12-cea548508033
+# ╟─04514294-71e6-4185-b5a0-35eb09066e6f
+# ╟─14f768ba-30e1-4fbb-ba80-70065873a830
+# ╟─dbcd0df8-c2ee-4ba0-bcb5-75fe898b6f0f
+# ╟─5a27e717-91ff-4d60-9e57-d32330121090
+# ╟─fb3f40bf-4b4b-4992-9eb7-667d8b12fe64
+# ╟─23095d73-0957-450e-8537-72431506fd4d
+# ╟─b2529e4f-a312-4adc-adf2-3f1f70a7b35f
 # ╟─bb81d137-effe-4107-a61b-fd529cff8421
 # ╟─813427fb-7d88-44f3-b118-2d5b94031a50
+# ╟─4d8bfae0-2eda-462b-a9ec-c0082097305d
 # ╟─e3e99ddc-36ea-4b53-bb07-753670a013db
 # ╟─12fa8a68-6fed-4d1f-ac71-864ca078c5a7
+# ╟─6a7e36c3-f441-46e5-8070-906ee366260d
+# ╟─b188c630-5beb-40e3-9b92-260b385fc295
 # ╟─e8345099-906f-4965-bd3b-1d3f80eb2250
 # ╠═a8fc4634-018b-4633-85b3-fb0ba639a49a
 # ╟─53c3949d-6e77-4606-8882-db4a798eed2c
-# ╠═bdc485f2-c99c-4383-b62e-cbafd4905a3a
-# ╠═2e697f1e-9735-4e19-9a41-b614ca00ee30
-# ╠═130657ad-3798-4f09-9d7d-14a64becc275
-# ╟─c583a2da-c662-4f5e-81e3-358bf2b02313
+# ╟─9fa845c7-dd1e-40ea-9cd9-6126783aad94
 # ╟─da89afa4-43bc-4906-b01b-9f6ec455f229
 # ╟─025fed74-93a2-4bb9-96b6-9e4c1a00c75d
-# ╟─f45236fa-2dbf-4351-8fc5-b785a2093c66
-# ╟─e1784ad4-cd61-487d-ba87-00c0d137250b
-# ╟─f099e041-cf69-42ee-824a-716671b644b3
-# ╟─a3b15f2f-95f6-48a5-a6af-0719ddeb91cd
-# ╠═f3f18145-5a3f-4929-8041-5769daf46d8c
-# ╠═e4ebec31-d3b6-46ff-911f-05d7e16ed9e3
-# ╠═098f69ac-a0d4-4f3f-b9d1-e8c860bef94f
-# ╠═6fd98dd1-efca-4d7a-a9ad-c56dae973ab4
-# ╟─40608ffb-14da-4643-8f86-86f20c93001a
+# ╟─681ecbaa-1370-468a-b3d8-7f01b373b3f6
+# ╟─d904f54e-e284-46bb-b7a6-9fae79e01300
+# ╟─5edbb407-3655-45f6-aa9b-8fae111b2eee
+# ╟─4f68effa-b334-4c85-b462-d5c6554e7ea3
 # ╟─6da7221d-55be-41c2-b74d-00e993d299f6
+# ╠═dff61cee-c2c4-41aa-8fc1-fbac08a67beb
 # ╠═3bac1a1e-9bb1-4125-9b58-2bd43d959fa9
 # ╠═b622c2a7-6e74-4b49-9e11-ad5b78508cd9
 # ╠═04a3248a-9705-4c0f-bb44-5647fff61e81
@@ -1880,5 +1949,7 @@ version = "1.4.1+1"
 # ╠═d44450c2-fff7-4c4d-8231-57baab6cc404
 # ╠═229dec7b-d92c-4c74-8a9f-fe21c3b0fb0d
 # ╠═f8129573-5a9f-4989-a9f4-16659ef9b9af
+# ╠═96e27383-8c0b-4b95-b7fb-80bb97f390bb
+# ╠═5275bb7b-944d-4c25-a46d-44bda09d07e1
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
