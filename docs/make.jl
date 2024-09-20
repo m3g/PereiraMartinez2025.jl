@@ -30,6 +30,10 @@ makedocs(
     sitename = "PereiraMartinez2024.jl",
     format=Documenter.HTML(;
         mathengine=Documenter.MathJax3(),
+        size_threshold_ignore=[
+            "pluto_notebooks/proteinA_urea.md",
+            "pluto_notebooks/rnaset1_urea.md",
+        ],
     ),
     pages = [
         "Home" => "index.md",
