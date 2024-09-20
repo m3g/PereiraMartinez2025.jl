@@ -50,7 +50,7 @@ In [Lin & Timasheff, Biochemistry, 1994](https://pubs.acs.org/doi/10.1021/bi0020
 md"### Properties of aqueous solutions of urea"
 
 # ╔═╡ 6f3ec99b-15b1-4014-b146-09e29864382c
-md"Experimental data for urea aqueous solutions (28$^\circ$C):"
+md"Experimental data for urea aqueous solutions (at 25$^\circ$C):"
 
 # ╔═╡ 8293f49a-57a1-49b5-a2da-95a43b4cd097
 urea_data = DataFrame(
