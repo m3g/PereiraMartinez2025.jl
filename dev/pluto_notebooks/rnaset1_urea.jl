@@ -285,6 +285,8 @@ Integrating these curves provides a qualitative measure of the free energy of tr
 # ╔═╡ 4f68effa-b334-4c85-b462-d5c6554e7ea3
 md"""
 Implying the the denatured state is more favorably transfered to a 0.5 mol/L aqueous urea solution than the native state.
+
+The data above differs from that reported in the paper because they extrapolate the curves to low concentrations, adding an additional constant factor to both energy transfers. Nevertheless, the trends are similar, and indicate that at concentrations higher than $~$0.4 mol/L urea distabilizes the protein, being the effect subtler and perhaps opposite at lower concentrations.
 """
 
 # ╔═╡ 6da7221d-55be-41c2-b74d-00e993d299f6
