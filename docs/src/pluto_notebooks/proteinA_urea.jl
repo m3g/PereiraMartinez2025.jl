@@ -7,9 +7,6 @@ using InteractiveUtils
 # ╔═╡ 96e27383-8c0b-4b95-b7fb-80bb97f390bb
 import Pkg
 
-# ╔═╡ 0b04d8cc-36e6-4069-8f48-e2c4058f2839
-using Latexify
-
 # ╔═╡ dff61cee-c2c4-41aa-8fc1-fbac08a67beb
 using Trapz
 
@@ -152,6 +149,18 @@ M3 = 60.06u"g/mol"
 
 # ╔═╡ 5fd21ecd-80ab-4d7f-ad64-cb33a399c289
 M2 = 6768.46u"g/mol"
+
+# ╔═╡ deaa5dbb-e0db-4f26-b4b4-af2c72bec167
+md"""
+### States considered
+
+Here, fold states are considered, from the set obtained in the simulations: the native state and a denatured state:
+
+- Native state: Most representative structure of N8 basin.
+- Denatured state: Most reprentative structure of U6 basin.
+
+These states will be referred to as **N** and **U** from here on.
+"""
 
 # ╔═╡ dd52ea0b-db95-4d07-8d12-cea548508033
 md"### Converting concentrations:"
@@ -296,7 +305,6 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 EasyFit = "fde71243-0cda-4261-b7c7-4845bd106b21"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
 MolSimToolkit = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -308,7 +316,6 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 DataFrames = "~1.6.1"
 EasyFit = "~0.6.6"
 LaTeXStrings = "~1.3.1"
-Latexify = "~0.16.5"
 MolSimToolkit = "~1.18.1"
 Plots = "~1.40.8"
 PlutoUI = "~0.7.60"
@@ -322,7 +329,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "462273a7e4f1e29a79507a57ad862077f68deb15"
+project_hash = "8064f1599bc652ca467eba54f4ff185763673168"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1895,7 +1902,6 @@ version = "1.4.1+1"
 # ╟─19208b6e-7039-11ef-2685-c9fd57102877
 # ╟─77c25151-8673-4ec1-9687-80f1fceb4e5c
 # ╟─6f3ec99b-15b1-4014-b146-09e29864382c
-# ╠═0b04d8cc-36e6-4069-8f48-e2c4058f2839
 # ╟─8293f49a-57a1-49b5-a2da-95a43b4cd097
 # ╟─1ca88373-114c-464d-aaac-9f3b25893820
 # ╟─90ad306d-163e-4fb3-a00e-6b86c32900f9
@@ -1915,6 +1921,7 @@ version = "1.4.1+1"
 # ╟─e5aedbda-67e9-465e-91f1-10125bee8dc0
 # ╟─f9e5b61b-330d-40ee-8667-7af9012a6f62
 # ╟─5fd21ecd-80ab-4d7f-ad64-cb33a399c289
+# ╟─deaa5dbb-e0db-4f26-b4b4-af2c72bec167
 # ╟─dd52ea0b-db95-4d07-8d12-cea548508033
 # ╟─04514294-71e6-4185-b5a0-35eb09066e6f
 # ╟─14f768ba-30e1-4fbb-ba80-70065873a830
