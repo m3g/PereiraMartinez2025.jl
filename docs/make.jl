@@ -15,13 +15,19 @@ using MolSimToolkit
 using Unitful
 using EasyFit
 using Literate
-using PlutoStaticHTML: build_notebooks, BuildOptions, documenter_output
+using PlutoStaticHTML: build_notebooks, BuildOptions, documenter_output, html_output
 
 # Building markdown from Pluto notebooks
 pluto_notebooks_dir = joinpath(@__DIR__, "src", "pluto_notebooks")
 bopts = BuildOptions(
     pluto_notebooks_dir; 
     output_format=documenter_output, 
+    previous_dir=pluto_notebooks_dir,
+)
+build_notebooks(bopts)
+bopts = BuildOptions(
+    pluto_notebooks_dir; 
+    output_format=html_output, 
     previous_dir=pluto_notebooks_dir,
 )
 build_notebooks(bopts)
