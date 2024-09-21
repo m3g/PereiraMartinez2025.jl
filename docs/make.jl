@@ -1,20 +1,10 @@
 import Pkg
 Pkg.add([
     "Documenter",
-    "Plots",
-    "MolSimToolkit",
-    "Unitful",
-    "EasyFit",
-    "Literate",
     "PlutoStaticHTML",
 ]
 )
 using Documenter
-using Plots
-using MolSimToolkit
-using Unitful
-using EasyFit
-using Literate
 using PlutoStaticHTML: build_notebooks, BuildOptions, documenter_output, html_output
 
 # Building markdown from Pluto notebooks
