@@ -33,12 +33,6 @@ begin
     using PlutoUI
     TableOfContents()
 end
-
-# ╔═╡ fa586575-7aac-4f52-b87a-db84c242d114
-md"""
-To open and edit this notebook, [click here](../proteinA_urea.html)
-"""
-
 # ╔═╡ 6edcdced-5fb5-41f4-a741-27c98dcbd1b4
 md"# RNaseT1 transfer free energy to urea"
 
