@@ -15,12 +15,6 @@ bopts = BuildOptions(
     previous_dir=pluto_notebooks_dir,
 )
 build_notebooks(bopts)
-bopts = BuildOptions(
-    pluto_notebooks_dir; 
-    output_format=html_output, 
-    previous_dir=pluto_notebooks_dir,
-)
-build_notebooks(bopts)
 
 makedocs(
     sitename = "PereiraMartinez2024.jl",
