@@ -1,34 +1,42 @@
 import Pkg
 Pkg.add([
     "Documenter",
-    "PlutoStaticHTML",
+    "PlutoSliderServer",
+    "CRC32",
 ]
 )
 using Documenter
-using PlutoStaticHTML: build_notebooks, BuildOptions, documenter_output, html_output
+import PlutoSliderServer
+import CRC32
 
-# Building markdown from Pluto notebooks
-pluto_notebooks_dir = joinpath(@__DIR__, "src", "pluto_notebooks")
-bopts = BuildOptions(
-    pluto_notebooks_dir; 
-    output_format=documenter_output, 
-    previous_dir=pluto_notebooks_dir,
-)
-build_notebooks(bopts)
+# build html pages of the pluto notebooks, only if the jl was updated
+nbs = [
+    "$(@__DIR__)/src/pluto_notebooks/proteinA_urea.jl",
+    "$(@__DIR__)/src/pluto_notebooks/rnaset1_urea.jl",
+]
+for nb in nbs
+    checksum_file = tempdir()*"/"*string(open(CRC32.crc32,nb))
+    if isfile(checksum_file)
+        println("Notebook $nb was not updated.")
+    else
+        PlutoSliderServer.export_notebook(nb)
+        open(checksum_file, "w") do io write(io, "") end
+    end
+end
 
 makedocs(
     sitename = "PereiraMartinez2024.jl",
     format=Documenter.HTML(;
         mathengine=Documenter.MathJax3(),
         size_threshold_ignore=[
-            "pluto_notebooks/proteinA_urea.md",
-            "pluto_notebooks/rnaset1_urea.md",
+            "$(@__DIR__)/proteinA_urea.md",
+            "$(@__DIR__)/rnaset1_urea.md",
         ],
     ),
     pages = [
         "Home" => "index.md",
-        "BdpA in urea" => "pluto_notebooks/proteinA_urea.md",
-        "RNase T1 in urea" => "pluto_notebooks/rnaset1_urea.md",
+        "BdpA in urea" => "proteinA_urea.md",
+        "RNase T1 in urea" => "rnaset1_urea.md",
     ],
 )
 deploydocs(
@@ -37,3 +45,5 @@ deploydocs(
     branch = "gh-pages",
     versions = ["stable" => "v^", "v#.#"],
 )
+
+

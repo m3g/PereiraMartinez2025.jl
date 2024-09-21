@@ -1,3 +1,8 @@
 [deps]
+CRC = "44b605c4-b955-5f2b-9b6d-d2bd01d3d205"
+CRC32 = "b4567568-9dcc-467e-9b62-c342d3a501d3"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-PlutoStaticHTML = "359b1769-a58e-495b-9770-312e911026ad"
+LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
+PlutoSliderServer = "2fc8631c-6f24-4c5b-bca7-cbb509c42db4"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
