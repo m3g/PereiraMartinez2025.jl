@@ -316,6 +316,7 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 DataFrames = "~1.6.1"
 EasyFit = "~0.6.6"
 LaTeXStrings = "~1.3.1"
+MolSimToolkit = "~1.19.0"
 Plots = "~1.40.8"
 PlutoUI = "~0.7.60"
 Trapz = "~2.0.3"
@@ -328,7 +329,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "1014976164deca7bb58cee44ab2b2310a841a655"
+project_hash = "89eb9cfc874aad1e4304ba045f70c6bb38d1f84f"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]

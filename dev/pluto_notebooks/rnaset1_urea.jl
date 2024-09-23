@@ -312,7 +312,7 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 DataFrames = "~1.6.1"
 EasyFit = "~0.6.6"
 LaTeXStrings = "~1.3.1"
-MolSimToolkit = "~1.18.1"
+MolSimToolkit = "~1.19.0"
 Plots = "~1.40.8"
 PlutoUI = "~0.7.60"
 Trapz = "~2.0.3"
@@ -325,7 +325,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "8064f1599bc652ca467eba54f4ff185763673168"
+project_hash = "89eb9cfc874aad1e4304ba045f70c6bb38d1f84f"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1049,9 +1049,9 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MolSimToolkit]]
 deps = ["AtomsBase", "CellListMap", "Chemfiles", "DocStringExtensions", "EasyFit", "LaTeXStrings", "LinearAlgebra", "OffsetArrays", "PDBTools", "ProgressMeter", "ProteinSecondaryStructures", "Reexport", "StaticArrays", "Statistics", "StatsBase", "TestItems"]
-git-tree-sha1 = "a7f4596be5950f4c1b30a25ee00a8ee19bbf6531"
+git-tree-sha1 = "c7072a3552b40f20d20c9bd56e8da0b0b527205d"
 uuid = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
-version = "1.18.1"
+version = "1.19.0"
 weakdeps = ["Plots"]
 
     [deps.MolSimToolkit.extensions]
