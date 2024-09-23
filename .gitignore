@@ -2,3 +2,4 @@
 docs/build
 *.swp
 *backup*
+docs/src/pluto_notebooks/Manifest.toml
