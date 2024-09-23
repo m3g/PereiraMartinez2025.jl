@@ -197,7 +197,7 @@ simulated_m₃ = DataFrame(
 md"### Simulated preferential interactions:"
 
 # ╔═╡ bb81d137-effe-4107-a61b-fd529cff8421
-md"The preferential interaction parameters of BpDA in urea, for the N and U states, are (converted from mol/mol to g/g):"
+md"The preferential interaction parameters of BpdA in urea, for the N and U states, are (converted from mol/mol to g/g):"
 
 # ╔═╡ 813427fb-7d88-44f3-b118-2d5b94031a50
 ∂g₃∂g₂ = DataFrame(
@@ -316,7 +316,6 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 DataFrames = "~1.6.1"
 EasyFit = "~0.6.6"
 LaTeXStrings = "~1.3.1"
-MolSimToolkit = "~1.18.1"
 Plots = "~1.40.8"
 PlutoUI = "~0.7.60"
 Trapz = "~2.0.3"
@@ -329,7 +328,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "8064f1599bc652ca467eba54f4ff185763673168"
+project_hash = "1014976164deca7bb58cee44ab2b2310a841a655"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1053,9 +1052,9 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MolSimToolkit]]
 deps = ["AtomsBase", "CellListMap", "Chemfiles", "DocStringExtensions", "EasyFit", "LaTeXStrings", "LinearAlgebra", "OffsetArrays", "PDBTools", "ProgressMeter", "ProteinSecondaryStructures", "Reexport", "StaticArrays", "Statistics", "StatsBase", "TestItems"]
-git-tree-sha1 = "a7f4596be5950f4c1b30a25ee00a8ee19bbf6531"
+git-tree-sha1 = "c7072a3552b40f20d20c9bd56e8da0b0b527205d"
 uuid = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
-version = "1.18.1"
+version = "1.19.0"
 weakdeps = ["Plots"]
 
     [deps.MolSimToolkit.extensions]
@@ -1114,9 +1113,9 @@ version = "1.4.3"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "1b35263570443fdd9e76c76b7062116e2f374ab8"
+git-tree-sha1 = "7493f61f55a6cce7325f197443aa80d32554ba10"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.0.15+0"
+version = "3.0.15+1"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
