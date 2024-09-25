@@ -35,7 +35,104 @@ begin
 end
 
 # ╔═╡ 6edcdced-5fb5-41f4-a741-27c98dcbd1b4
-md"# RNaseT1 transfer free energy to urea"
+md"# SH3 transfer free energy to urea"
+
+# ╔═╡ ea84b823-a39d-455c-be84-fe9dce10c4d8
+md"## SH3 in urea"
+
+# ╔═╡ 7ee8f5de-12d7-4dac-8933-a319ee6ed77a
+md"""
+In [Lin & Timasheff, Biochemistry, 1994](https://pubs.acs.org/doi/10.1021/bi00208a021), the following equation (Equation 5 of the article) is used to obtain the variation of the chemical potential of the proteins as a function of the concentration, $m_3$, of the cosolvent:
+
+$$\left(\frac{\partial\mu_2}{\partial m_3}\right)_{T,P,m_2} = 
+-\left(\frac{\partial g_3}{\partial g_2}\right)_{T,P,\mu_3}
+\left(\frac{RTM_2}{M_3}\right)
+\left(\frac{1}{m_3}+\frac{\partial\ln \gamma_3}{\partial m_3}\right)$$
+
+"""
+
+# ╔═╡ e5aedbda-67e9-465e-91f1-10125bee8dc0
+md"where, in the case of urea (species 3) and SH3 (solute, species 2) we have:"
+
+# ╔═╡ f9e5b61b-330d-40ee-8667-7af9012a6f62
+M3 = 60.06u"g/mol"
+
+# ╔═╡ 5fd21ecd-80ab-4d7f-ad64-cb33a399c289
+M2 = 6456.06u"g/mol"
+
+# ╔═╡ ca23c373-02c2-4e50-8c48-0cb2477eed59
+md"""
+and $\partial g_3\partial g_2$ are the preferential interaction parameters and $\gamma_3$ is the activity coefficient of the cosolvent. Here, the preferential interaction parameters are obtained from the simulations, and the activity coefficients are obtained from the reported experimental data (see below).
+"""
+
+# ╔═╡ deaa5dbb-e0db-4f26-b4b4-af2c72bec167
+md"""
+### States considered
+
+Here, three fold states are considered, from the set obtained in the simulations: the native state and two denatured state:
+
+- Native state: Most representative structure of the $N^S_1$ basin.
+- First denatured state: Most reprentative structure of the $U^S_4$ basin.
+- Second denatured state: Most reprentative structure of the $U^S_9$ basin.
+
+These states will be referred to as **N** and **U1** and **U2** from here on.
+"""
+
+# ╔═╡ fb3f40bf-4b4b-4992-9eb7-667d8b12fe64
+md"The molalities of urea in the bulk phase of each simulated concentration are:"
+
+# ╔═╡ b2529e4f-a312-4adc-adf2-3f1f70a7b35f
+md"### Simulated preferential interactions:"
+
+# ╔═╡ bb81d137-effe-4107-a61b-fd529cff8421
+md"The preferential interaction parameters of SH3 in urea, for the N, U1, and U2 states, are (converted from mol/mol to g/g):"
+
+# ╔═╡ 813427fb-7d88-44f3-b118-2d5b94031a50
+∂g₃∂g₂ = DataFrame(
+	"N" => [ 0.73768, 1.27354, 1.65489, 2.21501, 2.95252 ] / (M2/M3),
+	"U1" => [ 0.75877, 1.42458, 2.05114, 2.83034, 3.54650 ] / (M2/M3),
+	"U2" => [ 0.87065, 2.11169, 2.95761, 3.97993, 4.56168 ] / (M2/M3),
+)
+
+# ╔═╡ 4b30017b-ef13-45f1-8303-13a87b154841
+md"Corresponding to the folowing plot:"
+
+# ╔═╡ b188c630-5beb-40e3-9b92-260b385fc295
+md"### The transfer free energy"
+
+# ╔═╡ e3e99ddc-36ea-4b53-bb07-753670a013db
+md"Using the gas constant in kcal/(K mol), and the temperature in K:"
+
+# ╔═╡ 12fa8a68-6fed-4d1f-ac71-864ca078c5a7
+R = 1.9872036e-3u"kcal/(K*mol)"
+
+# ╔═╡ 6a7e36c3-f441-46e5-8070-906ee366260d
+T = 298u"K"
+
+# ╔═╡ e8345099-906f-4965-bd3b-1d3f80eb2250
+md"We can define Eq. 5 of the article (written above), as a function of the preferential interactions, molar mass of the cossolvent, and ∂lnγ₃∂m₃:"
+
+# ╔═╡ 53c3949d-6e77-4606-8882-db4a798eed2c
+md"Applying this equation to the data obtained from the simulations, we get:"
+
+# ╔═╡ da89afa4-43bc-4906-b01b-9f6ec455f229
+md"""
+Now we can plot those values as function of the concentration of urea:
+"""
+
+# ╔═╡ 681ecbaa-1370-468a-b3d8-7f01b373b3f6
+md"""
+The shaded areas are, qualitatively, the transfer free energy of each state up to each concentration. 
+
+At higher urea concentrations the integrals associated to the denatured states become progressively more negative, thus the denatured states are stabilized relative to the native state upon transfer to a urea solution. 
+
+Integrating these curves provides a qualitative measure of the free energy of transfer in each case:
+"""
+
+# ╔═╡ 4f68effa-b334-4c85-b462-d5c6554e7ea3
+md"""
+Implying the the denatured states are slightly more favorably transfered to a 0.5 mol/L aqueous urea solution than the native state. The difference probably increases with increasing urea concentration.
+"""
 
 # ╔═╡ 3b976cdf-09d2-4c43-881c-c1eadb4ea238
 md"## Aqueous solutions of urea: experimental data"
@@ -50,7 +147,7 @@ In [Lin & Timasheff, Biochemistry, 1994](https://pubs.acs.org/doi/10.1021/bi0020
 md"### Properties of aqueous solutions of urea"
 
 # ╔═╡ 6f3ec99b-15b1-4014-b146-09e29864382c
-md"Experimental data for urea aqueous solutions (25$^\circ$C):"
+md"Experimental data for urea aqueous solutions (at 25$^\circ$C):"
 
 # ╔═╡ 8293f49a-57a1-49b5-a2da-95a43b4cd097
 urea_data = DataFrame(
@@ -92,6 +189,9 @@ md"The derivative of the logarithmic of the activity coefficient as a function o
 # ╔═╡ f9ec92d4-4ab4-4a9c-b240-7fe5d28e0018
 ∂lnγ₃∂m₃(m₃) = 2 * urea_fit.a * m₃ + urea_fit.b
 
+# ╔═╡ a8fc4634-018b-4633-85b3-fb0ba639a49a
+∂μ₂∂m₃(∂g₃∂g₂, m₃, M2, M3) = -(∂g₃∂g₂) * (R * T * M2 / M3) * (1/m₃ + ∂lnγ₃∂m₃(m₃))
+
 # ╔═╡ 24202850-e8fa-4172-91f9-d31ad67e0d3e
 md"""
 Which can be computed for the concentrations given in Table 2 of the article, and do not agree quantitatively, but follow the same trend:
@@ -127,45 +227,18 @@ md"Where the fit is:"
 # ╔═╡ d4efcd42-14e6-46f0-85b7-0c917b09e7a1
 density_fit
 
-# ╔═╡ ea84b823-a39d-455c-be84-fe9dce10c4d8
-md"## RNaseT1 in urea"
-
-# ╔═╡ 7ee8f5de-12d7-4dac-8933-a319ee6ed77a
-md"""
-With the data above, we can proceed to using equation 5 of Lin and Timasheff:
-
-$$\left(\frac{\partial\mu_2}{\partial m_3}\right)_{T,P,m_2} = 
--\left(\frac{\partial g_3}{\partial g_2}\right)_{T,P,\mu_3}
-\left(\frac{RTM_2}{M_3}\right)
-\left(\frac{1}{m_3}+\frac{\partial\ln \gamma_3}{\partial m_3}\right)$$
-
-"""
-
-# ╔═╡ e5aedbda-67e9-465e-91f1-10125bee8dc0
-md"where, in the case of urea (species 3) and BdpA (solute, species 2) we have:"
-
-# ╔═╡ f9e5b61b-330d-40ee-8667-7af9012a6f62
-M3 = 60.06u"g/mol"
-
-# ╔═╡ 5fd21ecd-80ab-4d7f-ad64-cb33a399c289
-M2 = 11000u"g/mol"
-
-# ╔═╡ 393619ed-b57c-462a-83fa-e03cff2f1663
-md"""
-The RNase-T1 and RCM-T1 constructos of the article, modeling the native and denatured states of RNase-T1, will be named from now on **N** and **U** states, respectively. 
-"""
-
 # ╔═╡ dd52ea0b-db95-4d07-8d12-cea548508033
-md"### Converting concentrations:"
+md"### Converting simulated concentrations:"
 
 # ╔═╡ 04514294-71e6-4185-b5a0-35eb09066e6f
-md"For the N and U states, the obtained bulk concentrations of urea are obtained from the simulations:"
+md"For the N and U states, the obtained bulk concentrations of urea are obtained from the simulations in mol/L:"
 
 
 # ╔═╡ 14f768ba-30e1-4fbb-ba80-70065873a830
 c = DataFrame(
-    "N" => [0.5, 1.0, 2.0]u"mol/L",
-	"U" => [0.5, 1.0, 2.0]u"mol/L",
+    "N" => [ 0.094341, 0.19700, 0.29095, 0.39787, 0.49431 ]u"mol/L",
+	"U1" => [ 0.097457, 0.19680, 0.29421, 0.39285, 0.49720 ]u"mol/L",
+	"U2" => [ 0.095718, 0.19406, 0.28931, 0.39249, 0.48778 ]u"mol/L",
 )
 
 # ╔═╡ dbcd0df8-c2ee-4ba0-bcb5-75fe898b6f0f
@@ -174,120 +247,68 @@ md"The densities corresponding to these concentrations, according to the experim
 # ╔═╡ 5a27e717-91ff-4d60-9e57-d32330121090
 ρ = DataFrame(
 	"N" => density_fit.(c[!,"N"]),
-	"U" => density_fit.(c[!,"U"]),
+	"U1" => density_fit.(c[!,"U1"]),
+	"U2" => density_fit.(c[!,"U2"]),
 )
-
-# ╔═╡ fb3f40bf-4b4b-4992-9eb7-667d8b12fe64
-md"With which we can compute the molality of urea in each simulated concentration:"
 
 # ╔═╡ 23095d73-0957-450e-8537-72431506fd4d
 simulated_m₃ = DataFrame(
 	"N" => uconvert.(u"mol/kg", c[!,"N"] ./ ρ[!,"N"]),
-	"U" => uconvert.(u"mol/kg", c[!,"U"] ./ ρ[!,"U"]),
-)
-
-# ╔═╡ b2529e4f-a312-4adc-adf2-3f1f70a7b35f
-md"### Preferential interactions:"
-
-# ╔═╡ bb81d137-effe-4107-a61b-fd529cff8421
-md"The preferential interaction parameters of BdpA in urea, for the N8 and U6 states, are:"
-
-# ╔═╡ 813427fb-7d88-44f3-b118-2d5b94031a50
-∂g₃∂g₂ = DataFrame(
-	"N" => [0.0244, 0.0345, 0.0647],
-	"U" => [0.0247, 0.0542, 0.1445],
+	"U1" => uconvert.(u"mol/kg", c[!,"U1"] ./ ρ[!,"U1"]),
+	"U2" => uconvert.(u"mol/kg", c[!,"U2"] ./ ρ[!,"U2"]),
 )
 
 # ╔═╡ 4d8bfae0-2eda-462b-a9ec-c0082097305d
 begin
 	p3 = scatter(MolSimStyle,
 		simulated_m₃[!,"N"], ∂g₃∂g₂[!,"N"], label="N",
-		xlabel=L"m_3", ylabel=L"\partial g_2\partial g_3",
+		xlabel=L"m_3", ylabel=L"\partial g_2\partial g_3 \mathrm{(g/g)}",
 	)
 	scatter!(p3,
-		simulated_m₃[!,"U"], ∂g₃∂g₂[!,"U"], label="U",
+		simulated_m₃[!,"U1"], ∂g₃∂g₂[!,"U1"], label="U1",
+	)
+	scatter!(p3,
+		simulated_m₃[!,"U2"], ∂g₃∂g₂[!,"U2"], label="U2",
 	)
 	plot!(p3, size=(400,300))
 end
 
-# ╔═╡ e3e99ddc-36ea-4b53-bb07-753670a013db
-md"And using the gas constant in kcal/(K mol), and the temperature in K:"
-
-# ╔═╡ 12fa8a68-6fed-4d1f-ac71-864ca078c5a7
-R = 1.9872036e-3u"kcal/(K*mol)"
-
-# ╔═╡ 6a7e36c3-f441-46e5-8070-906ee366260d
-T = 298u"K"
-
-# ╔═╡ b188c630-5beb-40e3-9b92-260b385fc295
-md"### The transfer free energy"
-
-# ╔═╡ e8345099-906f-4965-bd3b-1d3f80eb2250
-md"We can define Eq. 5 of the article (written above), as a function of the preferential interactions, molar mass of the cossolvent, and ∂lnγ₃∂m₃:"
-
-# ╔═╡ a8fc4634-018b-4633-85b3-fb0ba639a49a
-∂μ₂∂m₃(∂g₃∂g₂, m₃, M2, M3) = 
-	-(∂g₃∂g₂) * (R * T * M2 / M3) * (1/m₃ + ∂lnγ₃∂m₃(m₃))
-
-# ╔═╡ 53c3949d-6e77-4606-8882-db4a798eed2c
-md"Applying this equation to the three possible sets of parameters for the three concentrations studied in the paper, we get:"
-
 # ╔═╡ 9fa845c7-dd1e-40ea-9cd9-6126783aad94
 ∂μ₂∂m₃_sim = DataFrame(
     "N" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"N"], simulated_m₃[!,"N"], M2, M3),
-	"U" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"U"], simulated_m₃[!,"U"], M2, M3),
+	"U1" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"U1"], simulated_m₃[!,"U1"], M2, M3),
+	"U2" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"U2"], simulated_m₃[!,"U2"], M2, M3),
 )
-
-# ╔═╡ da89afa4-43bc-4906-b01b-9f6ec455f229
-md"""
-Now we can plot those values as function of the concentration of urea:
-"""
 
 # ╔═╡ 025fed74-93a2-4bb9-96b6-9e4c1a00c75d
 begin
-	p2 = scatter(MolSimStyle,
-		simulated_m₃[!,"N"], ∂μ₂∂m₃_sim[!,"N"], label="N",
-		xlabel=L"m_3", ylabel=L"\partial\mu_2\partial m_3",
-		color=:blue,
-	)
-	plot!(p2, 
-		simulated_m₃[!,"N"], ∂μ₂∂m₃_sim[!,"N"], label=nothing,
-		fillrange=(0:0.5), fc=:blue, alpha=0.1, 
-	)
-	scatter!(p2,
-		simulated_m₃[!,"U"], ∂μ₂∂m₃_sim[!,"U"], label="U",
-		color=:orange,
-	)
-	plot!(p2, 
-		simulated_m₃[!,"U"], ∂μ₂∂m₃_sim[!,"U"], label=nothing,
-		fillrange=(0:0.5), fc=:orange, alpha=0.1, 
-	)
+	p2 = plot()
+	states = ["N", "U1", "U2"]
+	colors = [:blue, :orange, :green]
+	for i in eachindex(states)
+		s = states[i]
+		c = colors[i]
+	    p2 = scatter!(MolSimStyle,
+	    	simulated_m₃[!,s], ∂μ₂∂m₃_sim[!,s], label=s,
+	 		xlabel=L"m_3", ylabel=L"\partial\mu_2\partial m_3",
+			color=c,
+		)
+		plot!(p2, 
+			simulated_m₃[!,s], ∂μ₂∂m₃_sim[!,s], label=nothing,
+			fillrange=(0:0.5), fc=c, alpha=0.1, 
+		)
+	end
 	plot!(p2, size=(400,300))
 end
-
-# ╔═╡ 681ecbaa-1370-468a-b3d8-7f01b373b3f6
-md"""
-The shaded areas are, qualitatively, the transfer free energy of each state up to each concentration. 
-
-The plot shows that at very low concentrations, the native state has a lower transfer free energy to urea than the denatured state. Thus, at this low concentration, the native state is stabilized in urea relative to the denatured state. 
-
-At higher urea concentrations the integral associated to the denatured state becomes progressively more negative, thus the denatured state is stabilized relative to the native state upon transfer to a urea solution. 
-
-Integrating these curves provides a qualitative measure of the free energy of transfer in each case:
-"""
 
 # ╔═╡ d904f54e-e284-46bb-b7a6-9fae79e01300
 Δμ₂_N = trapz(simulated_m₃[!,"N"],∂μ₂∂m₃_sim[!,"N"])
 
 # ╔═╡ 5edbb407-3655-45f6-aa9b-8fae111b2eee
-Δμ₂_U = trapz(simulated_m₃[!,"U"],∂μ₂∂m₃_sim[!,"U"])
+Δμ₂_U1 = trapz(simulated_m₃[!,"U1"],∂μ₂∂m₃_sim[!,"U1"])
 
-# ╔═╡ 4f68effa-b334-4c85-b462-d5c6554e7ea3
-md"""
-Implying the the denatured state is more favorably transfered to a 0.5 mol/L aqueous urea solution than the native state.
-
-The data above differs from that reported in the paper because they extrapolate the curves to low concentrations, adding an additional constant factor to both energy transfers. Nevertheless, the trends are similar, and indicate that at concentrations higher than $~$0.4 mol/L urea distabilizes the protein, being the effect subtler and perhaps opposite at lower concentrations.
-"""
+# ╔═╡ 62629866-b03e-4a61-b3fa-b6a12e3aa7c8
+Δμ₂_U2 = trapz(simulated_m₃[!,"U2"],∂μ₂∂m₃_sim[!,"U2"])
 
 # ╔═╡ 6da7221d-55be-41c2-b74d-00e993d299f6
 md"### Packages used"
@@ -323,9 +344,9 @@ Unitful = "~1.21.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.11.0-rc3"
 manifest_format = "2.0"
-project_hash = "89eb9cfc874aad1e4304ba045f70c6bb38d1f84f"
+project_hash = "b6895ed08ccd1f7ddf3e59ca14b1094a339f0363"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -351,7 +372,7 @@ version = "1.1.3"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
-version = "1.1.1"
+version = "1.1.2"
 
 [[deps.ArrayInterface]]
 deps = ["Adapt", "LinearAlgebra"]
@@ -385,6 +406,7 @@ version = "7.16.0"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
+version = "1.11.0"
 
 [[deps.AtomsBase]]
 deps = ["LinearAlgebra", "PeriodicTable", "Printf", "Requires", "StaticArrays", "Unitful", "UnitfulAtomic"]
@@ -394,6 +416,7 @@ version = "0.4.2"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+version = "1.11.0"
 
 [[deps.BitFlags]]
 git-tree-sha1 = "0691e34b3bb8be9307330f88d1a3c3f25466c24d"
@@ -547,6 +570,7 @@ version = "1.0.0"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+version = "1.11.0"
 
 [[deps.Dbus_jll]]
 deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl"]
@@ -575,6 +599,7 @@ version = "1.15.1"
 [[deps.Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+version = "1.11.0"
 
 [[deps.Distributions]]
 deps = ["AliasTables", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
@@ -635,9 +660,9 @@ version = "2.6.2+0"
 
 [[deps.FFMPEG]]
 deps = ["FFMPEG_jll"]
-git-tree-sha1 = "b57e3acbe22f8484b4b5ff66a7499717fe1a9cc8"
+git-tree-sha1 = "53ebe7511fa11d33bec688a9178fac4e49eeee00"
 uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
-version = "0.4.1"
+version = "0.4.2"
 
 [[deps.FFMPEG_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "PCRE2_jll", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
@@ -647,6 +672,7 @@ version = "4.4.4+1"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
+version = "1.11.0"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra"]
@@ -718,6 +744,7 @@ version = "1.0.14+0"
 [[deps.Future]]
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
+version = "1.11.0"
 
 [[deps.GLFW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll", "libdecor_jll", "xkbcommon_jll"]
@@ -812,6 +839,7 @@ version = "1.4.2"
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+version = "1.11.0"
 
 [[deps.InvertedIndices]]
 git-tree-sha1 = "0dc7b50b8d436461be01300fd8cd45aa0274b038"
@@ -872,9 +900,9 @@ version = "18.1.7+0"
 
 [[deps.LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "70c5da094887fd2cae843b8db33920bac4b6f07d"
+git-tree-sha1 = "854a9c268c43b77b0a27f22d7fab8d33cdb3a731"
 uuid = "dd4b983a-f0e5-5f8d-a1b7-129d4a5fb1ac"
-version = "2.10.2+0"
+version = "2.10.2+1"
 
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
@@ -905,16 +933,17 @@ version = "0.6.4"
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.4.0+0"
+version = "8.6.0+0"
 
 [[deps.LibGit2]]
 deps = ["Base64", "LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
+version = "1.11.0"
 
 [[deps.LibGit2_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll"]
 uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
-version = "1.6.4+0"
+version = "1.7.2+0"
 
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
@@ -923,6 +952,7 @@ version = "1.11.0+1"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+version = "1.11.0"
 
 [[deps.Libffi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -975,6 +1005,7 @@ version = "2.40.1+0"
 [[deps.LinearAlgebra]]
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+version = "1.11.0"
 
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
@@ -994,6 +1025,7 @@ version = "0.3.28"
 
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
+version = "1.11.0"
 
 [[deps.LoggingExtras]]
 deps = ["Dates", "Logging"]
@@ -1021,6 +1053,7 @@ version = "0.5.13"
 [[deps.Markdown]]
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+version = "1.11.0"
 
 [[deps.MbedTLS]]
 deps = ["Dates", "MbedTLS_jll", "MozillaCACerts_jll", "NetworkOptions", "Random", "Sockets"]
@@ -1031,7 +1064,7 @@ version = "1.1.9"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
-version = "2.28.2+1"
+version = "2.28.6+0"
 
 [[deps.Measures]]
 git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
@@ -1046,6 +1079,7 @@ version = "1.2.0"
 
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+version = "1.11.0"
 
 [[deps.MolSimToolkit]]
 deps = ["AtomsBase", "CellListMap", "Chemfiles", "DocStringExtensions", "EasyFit", "LaTeXStrings", "LinearAlgebra", "OffsetArrays", "PDBTools", "ProgressMeter", "ProteinSecondaryStructures", "Reexport", "StaticArrays", "Statistics", "StatsBase", "TestItems"]
@@ -1059,7 +1093,7 @@ weakdeps = ["Plots"]
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2023.1.10"
+version = "2023.12.12"
 
 [[deps.NLSolversBase]]
 deps = ["DiffResults", "Distributed", "FiniteDiff", "ForwardDiff"]
@@ -1095,7 +1129,7 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.23+4"
+version = "0.3.27+1"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1110,9 +1144,9 @@ version = "1.4.3"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "1b35263570443fdd9e76c76b7062116e2f374ab8"
+git-tree-sha1 = "7493f61f55a6cce7325f197443aa80d32554ba10"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.0.15+0"
+version = "3.0.15+1"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1184,9 +1218,13 @@ uuid = "30392449-352a-5448-841d-b1acce4e97dc"
 version = "0.43.4+0"
 
 [[deps.Pkg]]
-deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
+deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.10.0"
+version = "1.11.0"
+weakdeps = ["REPL"]
+
+    [deps.Pkg.extensions]
+    REPLExt = "REPL"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1246,13 +1284,14 @@ version = "1.4.3"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "66b20dd35966a748321d3b2537c4584cf40387c7"
+git-tree-sha1 = "1101cd475833706e4d0e7b122218257178f48f34"
 uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.3.2"
+version = "2.4.0"
 
 [[deps.Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+version = "1.11.0"
 
 [[deps.ProgressMeter]]
 deps = ["Distributed", "Printf"]
@@ -1308,12 +1347,14 @@ version = "2.11.1"
     Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 
 [[deps.REPL]]
-deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
+deps = ["InteractiveUtils", "Markdown", "Sockets", "StyledStrings", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
+version = "1.11.0"
 
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+version = "1.11.0"
 
 [[deps.RecipesBase]]
 deps = ["PrecompileTools"]
@@ -1380,6 +1421,7 @@ version = "1.4.5"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+version = "1.11.0"
 
 [[deps.Setfield]]
 deps = ["ConstructionBase", "Future", "MacroTools", "StaticArraysCore"]
@@ -1400,6 +1442,7 @@ version = "1.2.0"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+version = "1.11.0"
 
 [[deps.SortingAlgorithms]]
 deps = ["DataStructures"]
@@ -1410,7 +1453,7 @@ version = "1.2.1"
 [[deps.SparseArrays]]
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-version = "1.10.0"
+version = "1.11.0"
 
 [[deps.SpecialFunctions]]
 deps = ["IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
@@ -1444,9 +1487,14 @@ uuid = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
 version = "1.4.3"
 
 [[deps.Statistics]]
-deps = ["LinearAlgebra", "SparseArrays"]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "ae3bb1eb3bba077cd276bc5cfc337cc65c3075c0"
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-version = "1.10.0"
+version = "1.11.1"
+weakdeps = ["SparseArrays"]
+
+    [deps.Statistics.extensions]
+    SparseArraysExt = ["SparseArrays"]
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
@@ -1476,9 +1524,13 @@ version = "1.3.2"
 
 [[deps.StringManipulation]]
 deps = ["PrecompileTools"]
-git-tree-sha1 = "a04cabe79c5f01f4d723cc6704070ada0b9d46d5"
+git-tree-sha1 = "a6b1675a536c5ad1a60e5a5153e1fee12eb146e3"
 uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.3.4"
+version = "0.4.0"
+
+[[deps.StyledStrings]]
+uuid = "f489334b-da3d-4c2e-b8f0-e476e12c162b"
+version = "1.11.0"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -1487,7 +1539,7 @@ uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 [[deps.SuiteSparse_jll]]
 deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
-version = "7.2.1+1"
+version = "7.7.0+0"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -1520,6 +1572,7 @@ version = "0.1.1"
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+version = "1.11.0"
 
 [[deps.TestItems]]
 git-tree-sha1 = "42fd9023fef18b9b78c8343a4e2f3813ffbcefcb"
@@ -1549,6 +1602,7 @@ version = "1.5.1"
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+version = "1.11.0"
 
 [[deps.UnPack]]
 git-tree-sha1 = "387c1f73762231e86e0c9c5443ce3b4a0a9a0c2b"
@@ -1557,6 +1611,7 @@ version = "1.0.2"
 
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+version = "1.11.0"
 
 [[deps.UnicodeFun]]
 deps = ["REPL"]
@@ -1866,7 +1921,7 @@ version = "1.1.6+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.52.0+1"
+version = "1.59.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1894,6 +1949,35 @@ version = "1.4.1+1"
 
 # ╔═╡ Cell order:
 # ╟─6edcdced-5fb5-41f4-a741-27c98dcbd1b4
+# ╟─ea84b823-a39d-455c-be84-fe9dce10c4d8
+# ╟─7ee8f5de-12d7-4dac-8933-a319ee6ed77a
+# ╟─e5aedbda-67e9-465e-91f1-10125bee8dc0
+# ╟─f9e5b61b-330d-40ee-8667-7af9012a6f62
+# ╟─5fd21ecd-80ab-4d7f-ad64-cb33a399c289
+# ╟─ca23c373-02c2-4e50-8c48-0cb2477eed59
+# ╟─deaa5dbb-e0db-4f26-b4b4-af2c72bec167
+# ╟─fb3f40bf-4b4b-4992-9eb7-667d8b12fe64
+# ╟─23095d73-0957-450e-8537-72431506fd4d
+# ╟─b2529e4f-a312-4adc-adf2-3f1f70a7b35f
+# ╟─bb81d137-effe-4107-a61b-fd529cff8421
+# ╟─813427fb-7d88-44f3-b118-2d5b94031a50
+# ╟─4b30017b-ef13-45f1-8303-13a87b154841
+# ╟─4d8bfae0-2eda-462b-a9ec-c0082097305d
+# ╟─b188c630-5beb-40e3-9b92-260b385fc295
+# ╟─e3e99ddc-36ea-4b53-bb07-753670a013db
+# ╟─12fa8a68-6fed-4d1f-ac71-864ca078c5a7
+# ╟─6a7e36c3-f441-46e5-8070-906ee366260d
+# ╟─e8345099-906f-4965-bd3b-1d3f80eb2250
+# ╠═a8fc4634-018b-4633-85b3-fb0ba639a49a
+# ╟─53c3949d-6e77-4606-8882-db4a798eed2c
+# ╟─9fa845c7-dd1e-40ea-9cd9-6126783aad94
+# ╟─da89afa4-43bc-4906-b01b-9f6ec455f229
+# ╟─025fed74-93a2-4bb9-96b6-9e4c1a00c75d
+# ╟─681ecbaa-1370-468a-b3d8-7f01b373b3f6
+# ╟─d904f54e-e284-46bb-b7a6-9fae79e01300
+# ╟─5edbb407-3655-45f6-aa9b-8fae111b2eee
+# ╟─62629866-b03e-4a61-b3fa-b6a12e3aa7c8
+# ╟─4f68effa-b334-4c85-b462-d5c6554e7ea3
 # ╟─3b976cdf-09d2-4c43-881c-c1eadb4ea238
 # ╟─19208b6e-7039-11ef-2685-c9fd57102877
 # ╟─77c25151-8673-4ec1-9687-80f1fceb4e5c
@@ -1906,43 +1990,17 @@ version = "1.4.1+1"
 # ╟─c08a180a-e8cf-4f02-9451-1d40fb96a653
 # ╠═f9ec92d4-4ab4-4a9c-b240-7fe5d28e0018
 # ╟─24202850-e8fa-4172-91f9-d31ad67e0d3e
-# ╠═c18b8343-1911-4864-918f-2083637524d7
+# ╟─c18b8343-1911-4864-918f-2083637524d7
 # ╠═72b526a6-6e22-40a1-ac76-8f766681ff87
 # ╟─7027914f-2195-472e-968e-c5e587b84dba
 # ╟─c1940fde-3164-40e7-8679-c16e872c38b8
 # ╟─b18ed62a-9b12-467d-b289-7720a45817d3
 # ╠═d4efcd42-14e6-46f0-85b7-0c917b09e7a1
-# ╟─ea84b823-a39d-455c-be84-fe9dce10c4d8
-# ╟─7ee8f5de-12d7-4dac-8933-a319ee6ed77a
-# ╟─e5aedbda-67e9-465e-91f1-10125bee8dc0
-# ╟─f9e5b61b-330d-40ee-8667-7af9012a6f62
-# ╟─5fd21ecd-80ab-4d7f-ad64-cb33a399c289
-# ╟─393619ed-b57c-462a-83fa-e03cff2f1663
 # ╟─dd52ea0b-db95-4d07-8d12-cea548508033
 # ╟─04514294-71e6-4185-b5a0-35eb09066e6f
 # ╟─14f768ba-30e1-4fbb-ba80-70065873a830
 # ╟─dbcd0df8-c2ee-4ba0-bcb5-75fe898b6f0f
 # ╟─5a27e717-91ff-4d60-9e57-d32330121090
-# ╟─fb3f40bf-4b4b-4992-9eb7-667d8b12fe64
-# ╟─23095d73-0957-450e-8537-72431506fd4d
-# ╟─b2529e4f-a312-4adc-adf2-3f1f70a7b35f
-# ╟─bb81d137-effe-4107-a61b-fd529cff8421
-# ╟─813427fb-7d88-44f3-b118-2d5b94031a50
-# ╟─4d8bfae0-2eda-462b-a9ec-c0082097305d
-# ╟─e3e99ddc-36ea-4b53-bb07-753670a013db
-# ╟─12fa8a68-6fed-4d1f-ac71-864ca078c5a7
-# ╟─6a7e36c3-f441-46e5-8070-906ee366260d
-# ╟─b188c630-5beb-40e3-9b92-260b385fc295
-# ╟─e8345099-906f-4965-bd3b-1d3f80eb2250
-# ╠═a8fc4634-018b-4633-85b3-fb0ba639a49a
-# ╟─53c3949d-6e77-4606-8882-db4a798eed2c
-# ╟─9fa845c7-dd1e-40ea-9cd9-6126783aad94
-# ╟─da89afa4-43bc-4906-b01b-9f6ec455f229
-# ╟─025fed74-93a2-4bb9-96b6-9e4c1a00c75d
-# ╟─681ecbaa-1370-468a-b3d8-7f01b373b3f6
-# ╟─d904f54e-e284-46bb-b7a6-9fae79e01300
-# ╟─5edbb407-3655-45f6-aa9b-8fae111b2eee
-# ╟─4f68effa-b334-4c85-b462-d5c6554e7ea3
 # ╟─6da7221d-55be-41c2-b74d-00e993d299f6
 # ╠═dff61cee-c2c4-41aa-8fc1-fbac08a67beb
 # ╠═3bac1a1e-9bb1-4125-9b58-2bd43d959fa9
