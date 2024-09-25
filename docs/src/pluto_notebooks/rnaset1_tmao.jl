@@ -4,6 +4,12 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 96e27383-8c0b-4b95-b7fb-80bb97f390bb
+import Pkg
+
+# ╔═╡ dff61cee-c2c4-41aa-8fc1-fbac08a67beb
+using Trapz
+
 # ╔═╡ 3bac1a1e-9bb1-4125-9b58-2bd43d959fa9
 using MolSimToolkit
 
@@ -29,14 +35,14 @@ begin
 end
 
 # ╔═╡ 6edcdced-5fb5-41f4-a741-27c98dcbd1b4
-md"# Computing the free energy of transfer"
+md"# RNaseT1 transfer free energy to TMAO"
 
 # ╔═╡ 3b976cdf-09d2-4c43-881c-c1eadb4ea238
-md"## Aqueous solutions of TMAO"
+md"## Aqueous solutions of TMAO: experimental data"
 
 # ╔═╡ 19208b6e-7039-11ef-2685-c9fd57102877
 md"""
-In Lin & Timasheff (Biochemistry 1994, 13, 12695), the activity coefficients ($\gamma_3$) of TMAO in aqueous solutions and the corresponding densities are provided. The data provided is that of $\gamma_3$ as a function of the concentration $m_3$ (in mol/kg):
+In [Lin & Timasheff, Biochemistry, 1994](https://pubs.acs.org/doi/10.1021/bi00208a021), the activity coefficients ($\gamma_3$) of TMAO in aqueous solutions and the corresponding densities are provided. The data provided is that of $\gamma_3$ as a function of the concentration $m_3$ (in mol/kg):
 
 """
 
@@ -44,13 +50,13 @@ In Lin & Timasheff (Biochemistry 1994, 13, 12695), the activity coefficients ($\
 md"### Properties of aqueous solutions of TMAO"
 
 # ╔═╡ 6f3ec99b-15b1-4014-b146-09e29864382c
-md"Experimental data for TMAO aqueous solutions (28$^\circ$C):"
+md"Experimental data for TMAO aqueous solutions (20$^\circ$C):"
 
 # ╔═╡ 8293f49a-57a1-49b5-a2da-95a43b4cd097
 tmao_data = DataFrame(
 	:m₃ => [0.0, 0.25, 0.52, 1.08]u"mol/kg",
 	:γ₃ => [1.0, 0.992, 0.965, 0.883],
-	:ρ₀ => [0.996232, 1.0029, 1.0034, 1.0058]u"g/mL",
+	:ρ₀ => [1.0, 1.0029, 1.0034, 1.0058]u"g/mL",
 )
 
 # ╔═╡ 1ca88373-114c-464d-aaac-9f3b25893820
@@ -60,14 +66,16 @@ The data above is used to compute the $(\partial\ln\gamma_3/\partial m_3)$ quant
 
 # ╔═╡ 90ad306d-163e-4fb3-a00e-6b86c32900f9
 begin
-scatter(MolSimStyle,
+p0 = scatter(MolSimStyle,
 	tmao_data[!,:m₃], log.(tmao_data[!,:γ₃]),
-	xlabel=L"m_3", ylabel=L"\ln(\gamma_3)", label="TMAO", color=:red,
+	xlabel=L"m_3", ylabel=L"\ln(\gamma_3)", label="TMAO", color=:blue,
 )
-plot!(
+plot!(p0,
 	tmao_data[!,:m₃], log.(tmao_data[!,:γ₃]); 
-	label=nothing, color=:red,
+	label=nothing, color=:blue,
 )
+plot!(p0, size=(400,300))
+p0
 end
 
 # ╔═╡ 357f0851-8ba2-4dbe-9c49-e5bd15f3f93b
@@ -76,13 +84,13 @@ The shape of the plot suggests that a quadratic fit will capture precisely the t
 """
 
 # ╔═╡ e30af672-9c42-4d19-8b5b-dbf1dc0d9680
-tmao_fit = fitquadratic(tmao_data[!,:m₃]),log.(tmao_data[!,:γ₃]))
+tmao_fit = fitquadratic(tmao_data[!,:m₃],log.(tmao_data[!,:γ₃]))
 
 # ╔═╡ c08a180a-e8cf-4f02-9451-1d40fb96a653
 md"The derivative of the logarithmic of the activity coefficient as a function of the molality is, then, the derivative of the above quadratic fit:"
 
 # ╔═╡ f9ec92d4-4ab4-4a9c-b240-7fe5d28e0018
-∂lnγ₃∂m₃(m₃) = (2 * tmao_fit.a * ustrip(m₃) + tmao_fit.b) / (oneunit(m₃))
+∂lnγ₃∂m₃(m₃) = 2 * tmao_fit.a * m₃ + tmao_fit.b
 
 # ╔═╡ 24202850-e8fa-4172-91f9-d31ad67e0d3e
 md"""
@@ -96,7 +104,7 @@ tmao_data[:, :∂lnγ₃∂m₃] = ∂lnγ₃∂m₃.(tmao_data[!,:m₃])
 tmao_data
 
 # ╔═╡ ea84b823-a39d-455c-be84-fe9dce10c4d8
-md"## RNaseT1 in TMAO (validation)"
+md"## RNaseT1 in TMAO"
 
 # ╔═╡ 7ee8f5de-12d7-4dac-8933-a319ee6ed77a
 md"""
@@ -110,52 +118,70 @@ $$\left(\frac{\partial\mu_2}{\partial m_3}\right)_{T,P,m_2} =
 """
 
 # ╔═╡ e5aedbda-67e9-465e-91f1-10125bee8dc0
-md"where, in the case of TMAO (species 3) and SH3 (solute, species 2) we have:"
+md"where, in the case of tmao (species 3) and BdpA (solute, species 2) we have:"
 
 # ╔═╡ f9e5b61b-330d-40ee-8667-7af9012a6f62
 M3 = 75.10966u"g/mol"
 
 # ╔═╡ 5fd21ecd-80ab-4d7f-ad64-cb33a399c289
-M2 = 11200u"g/mol"
+M2 = 11000u"g/mol"
 
-# ╔═╡ dd52ea0b-db95-4d07-8d12-cea548508033
-md"### Experimental preferential interaction parameters"
+# ╔═╡ 393619ed-b57c-462a-83fa-e03cff2f1663
+md"""
+The RNase-T1 and RCM-T1 constructos of the article, modeling the native and denatured states of RNase-T1, will be named from now on **N** and **U** states, respectively. 
+"""
+
+# ╔═╡ b2529e4f-a312-4adc-adf2-3f1f70a7b35f
+md"### Preferential interactions:"
 
 # ╔═╡ bb81d137-effe-4107-a61b-fd529cff8421
-md"The preferential interaction parameters obtained for the native state, in our simulations, as a function of the TMAO concentration, are:"
+md"The preferential interaction parameters of BdpA in TMAO, for the N8 and U6 states, are:"
 
 # ╔═╡ 813427fb-7d88-44f3-b118-2d5b94031a50
-∂g₃∂g₂ = [ 0.0008, -0.0096, -0.0450 ]
+∂g₃∂g₂ = DataFrame(
+	"N" => [0.0008, -0.0096, -0.0450],
+	"U" => [-0.0238, -0.0258, -0.0069],
+)
+
+# ╔═╡ 4d8bfae0-2eda-462b-a9ec-c0082097305d
+begin
+	p3 = scatter(MolSimStyle,
+		tmao_data[!,:m₃], ∂g₃∂g₂[!,"N"], label="N",
+		xlabel=L"m_3", ylabel=L"\partial g_2\partial g_3",
+	)
+	scatter!(p3,
+		tmao_data[!,:m₃], ∂g₃∂g₂[!,"U"], label="U",
+	)
+	plot!(p3, size=(400,300))
+end
 
 # ╔═╡ e3e99ddc-36ea-4b53-bb07-753670a013db
-md"And using the gas constant in cal/(K mol):"
+md"And using the gas constant in kcal/(K mol), and the temperature in K:"
 
 # ╔═╡ 12fa8a68-6fed-4d1f-ac71-864ca078c5a7
-R = 1.98720425864083u"cal/(K*mol)"
+R = 1.9872036e-3u"kcal/(K*mol)"
+
+# ╔═╡ 6a7e36c3-f441-46e5-8070-906ee366260d
+T = 298u"K"
+
+# ╔═╡ b188c630-5beb-40e3-9b92-260b385fc295
+md"### The transfer free energy"
 
 # ╔═╡ e8345099-906f-4965-bd3b-1d3f80eb2250
 md"We can define Eq. 5 of the article (written above), as a function of the preferential interactions, molar mass of the cossolvent, and ∂lnγ₃∂m₃:"
 
 # ╔═╡ a8fc4634-018b-4633-85b3-fb0ba639a49a
-∂μ₃∂m₃(∂g₃∂g₂, m₃, ∂lnγ₃∂m₃,M2,M3) = 
-	-(∂g₃∂g₂) * (R * (28+273)u"K" * M2 / M3) * (1/m₃ + ∂lnγ₃∂m₃)
+∂μ₂∂m₃(∂g₃∂g₂, m₃, M2, M3) = 
+	-(∂g₃∂g₂) * (R * T * M2 / M3) * (1/m₃ + ∂lnγ₃∂m₃(m₃))
 
 # ╔═╡ 53c3949d-6e77-4606-8882-db4a798eed2c
 md"Applying this equation to the three possible sets of parameters for the three concentrations studied in the paper, we get:"
 
-# ╔═╡ bdc485f2-c99c-4383-b62e-cbafd4905a3a
-v1 = ∂μ₃∂m₃(∂g₃∂g₂[1], 0.25u"mol/kg", tmao_data[2,:∂lnγ₃∂m₃],M2,M3)
-
-# ╔═╡ 2e697f1e-9735-4e19-9a41-b614ca00ee30
-v2 = ∂μ₃∂m₃(∂g₃∂g₂[2], 0.52u"mol/kg", tmao_data[3,:∂lnγ₃∂m₃],M2,M3)
-
-# ╔═╡ 130657ad-3798-4f09-9d7d-14a64becc275
-v3 = ∂μ₃∂m₃(∂g₃∂g₂[3], 1.08u"mol/kg", tmao_data[4,:∂lnγ₃∂m₃],M2,M3)
-
-# ╔═╡ c583a2da-c662-4f5e-81e3-358bf2b02313
-md"""
-The values above are reasonably consistent with the reported -283, 1495 and 2973 cal/mol$^2$ of the paper.
-"""
+# ╔═╡ 9fa845c7-dd1e-40ea-9cd9-6126783aad94
+∂μ₂∂m₃_sim = DataFrame(
+    "N" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"N"], tmao_data[2:4,:m₃], M2, M3),
+	"U" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"U"], tmao_data[2:4,:m₃], M2, M3),
+)
 
 # ╔═╡ da89afa4-43bc-4906-b01b-9f6ec455f229
 md"""
@@ -164,46 +190,55 @@ Now we can plot those values as function of the concentration of TMAO:
 
 # ╔═╡ 025fed74-93a2-4bb9-96b6-9e4c1a00c75d
 begin
-	scatter(tmao_data[2:4,:m₃], [v1,v2,v3] ./ 1000;
-	    xlabel=L"$m_3$", ylabel=L"\partial\mu_2 / \partial m_3",
-		label=nothing,
+	p2 = scatter(MolSimStyle,
+		tmao_data[2:4,:m₃], ∂μ₂∂m₃_sim[!,"N"], label="N",
+		xlabel=L"m_3", ylabel=L"\partial\mu_2\partial m_3",
+		color=:blue,
 	)
-	f = fitlinear(ustrip.(tmao_data[2:4,:m₃]), ustrip.([v1,v2,v3] ./ 1000))
-	plot!(f.x,f.y; label=nothing, color=:blue)
-	plot!(xlims=[0,1.2], ylims=[-1,4])
+	plot!(p2, 
+		tmao_data[2:4,:m₃], ∂μ₂∂m₃_sim[!,"N"], label=nothing,
+		fillrange=(0:0.5), fc=:blue, alpha=0.1, 
+	)
+	scatter!(p2,
+		tmao_data[2:4,:m₃], ∂μ₂∂m₃_sim[!,"U"], label="U",
+		color=:orange,
+	)
+	plot!(p2, 
+		tmao_data[2:4,:m₃], ∂μ₂∂m₃_sim[!,"U"], label=nothing,
+		fillrange=(0:0.5), fc=:orange, alpha=0.1, 
+	)
+	plot!(p2, size=(400,300))
 end
 
-# ╔═╡ f45236fa-2dbf-4351-8fc5-b785a2093c66
+# ╔═╡ 681ecbaa-1370-468a-b3d8-7f01b373b3f6
 md"""
-And this plot corresponds to Figure 4 of the article (open squares).
+The shaded areas are, qualitatively, the transfer free energy of each state up to each concentration. 
+
+The plot shows that at very low concentrations, the native state has a lower transfer free energy to tmao than the denatured state. Thus, at this low concentration, the native state is stabilized in tmao relative to the denatured state. 
+
+At higher tmao concentrations the integral associated to the denatured state becomes progressively more negative, thus the denatured state is stabilized relative to the native state upon transfer to a a solution. 
+
+Integrating these curves provides a qualitative measure of the free energy of transfer in each case:
 """
 
-# ╔═╡ e1784ad4-cd61-487d-ba87-00c0d137250b
-md"The line above was, then fitted by a line:"
+# ╔═╡ d904f54e-e284-46bb-b7a6-9fae79e01300
+Δμ₂_N = trapz(tmao_data[2:4,:m₃],∂μ₂∂m₃_sim[!,"N"])
 
-# ╔═╡ f099e041-cf69-42ee-824a-716671b644b3
-tmao_fit2 = fitlinear(ustrip.(tmao_data[2:4,:m₃]), ustrip.([v1,v2,v3]))
+# ╔═╡ 5edbb407-3655-45f6-aa9b-8fae111b2eee
+Δμ₂_U = trapz(tmao_data[2:4,:m₃],∂μ₂∂m₃_sim[!,"U"])
 
-# ╔═╡ a3b15f2f-95f6-48a5-a6af-0719ddeb91cd
-md"And we have, now the integral of this line computed from zero to each concentration:"
+# ╔═╡ 4f68effa-b334-4c85-b462-d5c6554e7ea3
+md"""
+Implying the the denatured state is more favorably transfered to a 0.5 mol/L aqueous TMAO solution than the native state.
 
-# ╔═╡ f3f18145-5a3f-4929-8041-5769daf46d8c
-int(m₃, fit) = (fit.a/2)*ustrip(m₃)^2 + fit.b*ustrip(m₃)
-
-# ╔═╡ e4ebec31-d3b6-46ff-911f-05d7e16ed9e3
-int(tmao_data[2,:m₃], tmao_fit2)
-
-# ╔═╡ 098f69ac-a0d4-4f3f-b9d1-e8c860bef94f
-int(tmao_data[3,:m₃], tmao_fit2)
-
-# ╔═╡ 6fd98dd1-efca-4d7a-a9ad-c56dae973ab4
-int(tmao_data[4,:m₃], tmao_fit2)
-
-# ╔═╡ 40608ffb-14da-4643-8f86-86f20c93001a
-md"This last value is the one corresponding to the 1197 cal/mol reported for 1M TMAO in Table 5 of the article."
+The data above differs from that reported in the paper because they extrapolate the curves to low concentrations, adding an additional constant factor to both energy transfers. Nevertheless, the trends are similar, and indicate that at concentrations higher than $~$0.4 mol/L TMAO distabilizes the protein, being the effect subtler and perhaps opposite at lower concentrations.
+"""
 
 # ╔═╡ 6da7221d-55be-41c2-b74d-00e993d299f6
 md"### Packages used"
+
+# ╔═╡ 5275bb7b-944d-4c25-a46d-44bda09d07e1
+Pkg.status()
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -212,17 +247,20 @@ DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 EasyFit = "fde71243-0cda-4261-b7c7-4845bd106b21"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 MolSimToolkit = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+Trapz = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 DataFrames = "~1.6.1"
 EasyFit = "~0.6.6"
 LaTeXStrings = "~1.3.1"
-MolSimToolkit = "~1.18.1"
+MolSimToolkit = "~1.19.0"
 Plots = "~1.40.8"
 PlutoUI = "~0.7.60"
+Trapz = "~2.0.3"
 Unitful = "~1.21.0"
 """
 
@@ -232,7 +270,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.0-rc3"
 manifest_format = "2.0"
-project_hash = "f4dcfd538520c8ac6ba7d903f51e1312568c0e4a"
+project_hash = "b6895ed08ccd1f7ddf3e59ca14b1094a339f0363"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -296,9 +334,9 @@ version = "1.11.0"
 
 [[deps.AtomsBase]]
 deps = ["LinearAlgebra", "PeriodicTable", "Printf", "Requires", "StaticArrays", "Unitful", "UnitfulAtomic"]
-git-tree-sha1 = "0fa9318ceff45a514bd1dbed7563b32ae2cdb73f"
+git-tree-sha1 = "aab46de4a22e3619fe0167a18019b94a65033bd7"
 uuid = "a963bdd2-2df7-4f54-a1ee-49d51e6be12a"
-version = "0.4.1"
+version = "0.4.2"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -489,9 +527,9 @@ version = "1.11.0"
 
 [[deps.Distributions]]
 deps = ["AliasTables", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "e6c693a0e4394f8fda0e51a5bdf5aef26f8235e9"
+git-tree-sha1 = "d7477ecdafb813ddee2ae727afa94e9dcb5f3fb0"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.111"
+version = "0.25.112"
 
     [deps.Distributions.extensions]
     DistributionsChainRulesCoreExt = "ChainRulesCore"
@@ -516,9 +554,9 @@ version = "1.6.0"
 
 [[deps.EasyFit]]
 deps = ["LsqFit", "Parameters", "Statistics", "TestItems", "Unitful"]
-git-tree-sha1 = "a71d3ae61686877c11e0e5ff74892604c55bc2e0"
+git-tree-sha1 = "46097864204031cdf46d52f22cc8bf894c995cea"
 uuid = "fde71243-0cda-4261-b7c7-4845bd106b21"
-version = "0.6.7"
+version = "0.6.8"
 
     [deps.EasyFit.extensions]
     SplineFitExt = "Interpolations"
@@ -546,9 +584,9 @@ version = "2.6.2+0"
 
 [[deps.FFMPEG]]
 deps = ["FFMPEG_jll"]
-git-tree-sha1 = "b57e3acbe22f8484b4b5ff66a7499717fe1a9cc8"
+git-tree-sha1 = "53ebe7511fa11d33bec688a9178fac4e49eeee00"
 uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
-version = "0.4.1"
+version = "0.4.2"
 
 [[deps.FFMPEG_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "PCRE2_jll", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
@@ -786,9 +824,9 @@ version = "18.1.7+0"
 
 [[deps.LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "70c5da094887fd2cae843b8db33920bac4b6f07d"
+git-tree-sha1 = "854a9c268c43b77b0a27f22d7fab8d33cdb3a731"
 uuid = "dd4b983a-f0e5-5f8d-a1b7-129d4a5fb1ac"
-version = "2.10.2+0"
+version = "2.10.2+1"
 
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
@@ -969,9 +1007,9 @@ version = "1.11.0"
 
 [[deps.MolSimToolkit]]
 deps = ["AtomsBase", "CellListMap", "Chemfiles", "DocStringExtensions", "EasyFit", "LaTeXStrings", "LinearAlgebra", "OffsetArrays", "PDBTools", "ProgressMeter", "ProteinSecondaryStructures", "Reexport", "StaticArrays", "Statistics", "StatsBase", "TestItems"]
-git-tree-sha1 = "a7f4596be5950f4c1b30a25ee00a8ee19bbf6531"
+git-tree-sha1 = "c7072a3552b40f20d20c9bd56e8da0b0b527205d"
 uuid = "054db54f-6694-444d-9bbb-e9ecdbfe77be"
-version = "1.18.1"
+version = "1.19.0"
 weakdeps = ["Plots"]
 
     [deps.MolSimToolkit.extensions]
@@ -1030,9 +1068,9 @@ version = "1.4.3"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "1b35263570443fdd9e76c76b7062116e2f374ab8"
+git-tree-sha1 = "7493f61f55a6cce7325f197443aa80d32554ba10"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.0.15+0"
+version = "3.0.15+1"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1170,9 +1208,9 @@ version = "1.4.3"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "66b20dd35966a748321d3b2537c4584cf40387c7"
+git-tree-sha1 = "1101cd475833706e4d0e7b122218257178f48f34"
 uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.3.2"
+version = "2.4.0"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1410,9 +1448,9 @@ version = "1.3.2"
 
 [[deps.StringManipulation]]
 deps = ["PrecompileTools"]
-git-tree-sha1 = "a04cabe79c5f01f4d723cc6704070ada0b9d46d5"
+git-tree-sha1 = "a6b1675a536c5ad1a60e5a5153e1fee12eb146e3"
 uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.3.4"
+version = "0.4.0"
 
 [[deps.StyledStrings]]
 uuid = "f489334b-da3d-4c2e-b8f0-e476e12c162b"
@@ -1461,14 +1499,19 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 version = "1.11.0"
 
 [[deps.TestItems]]
-git-tree-sha1 = "8621ba2637b49748e2dc43ba3d84340be2938022"
+git-tree-sha1 = "42fd9023fef18b9b78c8343a4e2f3813ffbcefcb"
 uuid = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
-version = "0.1.1"
+version = "1.0.0"
 
 [[deps.TranscodingStreams]]
 git-tree-sha1 = "e84b3a11b9bece70d14cce63406bbc79ed3464d2"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.11.2"
+
+[[deps.Trapz]]
+git-tree-sha1 = "79eb0ed763084a3e7de81fe1838379ac6a23b6a0"
+uuid = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
+version = "2.0.3"
 
 [[deps.Tricks]]
 git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
@@ -1842,37 +1885,34 @@ version = "1.4.1+1"
 # ╟─c08a180a-e8cf-4f02-9451-1d40fb96a653
 # ╠═f9ec92d4-4ab4-4a9c-b240-7fe5d28e0018
 # ╟─24202850-e8fa-4172-91f9-d31ad67e0d3e
-# ╠═c18b8343-1911-4864-918f-2083637524d7
-# ╠═72b526a6-6e22-40a1-ac76-8f766681ff87
+# ╟─c18b8343-1911-4864-918f-2083637524d7
+# ╟─72b526a6-6e22-40a1-ac76-8f766681ff87
 # ╟─ea84b823-a39d-455c-be84-fe9dce10c4d8
 # ╟─7ee8f5de-12d7-4dac-8933-a319ee6ed77a
 # ╟─e5aedbda-67e9-465e-91f1-10125bee8dc0
 # ╟─f9e5b61b-330d-40ee-8667-7af9012a6f62
 # ╟─5fd21ecd-80ab-4d7f-ad64-cb33a399c289
-# ╟─dd52ea0b-db95-4d07-8d12-cea548508033
+# ╟─393619ed-b57c-462a-83fa-e03cff2f1663
+# ╟─b2529e4f-a312-4adc-adf2-3f1f70a7b35f
 # ╟─bb81d137-effe-4107-a61b-fd529cff8421
 # ╟─813427fb-7d88-44f3-b118-2d5b94031a50
+# ╟─4d8bfae0-2eda-462b-a9ec-c0082097305d
 # ╟─e3e99ddc-36ea-4b53-bb07-753670a013db
 # ╟─12fa8a68-6fed-4d1f-ac71-864ca078c5a7
+# ╟─6a7e36c3-f441-46e5-8070-906ee366260d
+# ╟─b188c630-5beb-40e3-9b92-260b385fc295
 # ╟─e8345099-906f-4965-bd3b-1d3f80eb2250
 # ╠═a8fc4634-018b-4633-85b3-fb0ba639a49a
 # ╟─53c3949d-6e77-4606-8882-db4a798eed2c
-# ╠═bdc485f2-c99c-4383-b62e-cbafd4905a3a
-# ╠═2e697f1e-9735-4e19-9a41-b614ca00ee30
-# ╠═130657ad-3798-4f09-9d7d-14a64becc275
-# ╟─c583a2da-c662-4f5e-81e3-358bf2b02313
+# ╠═9fa845c7-dd1e-40ea-9cd9-6126783aad94
 # ╟─da89afa4-43bc-4906-b01b-9f6ec455f229
 # ╟─025fed74-93a2-4bb9-96b6-9e4c1a00c75d
-# ╟─f45236fa-2dbf-4351-8fc5-b785a2093c66
-# ╟─e1784ad4-cd61-487d-ba87-00c0d137250b
-# ╟─f099e041-cf69-42ee-824a-716671b644b3
-# ╟─a3b15f2f-95f6-48a5-a6af-0719ddeb91cd
-# ╠═f3f18145-5a3f-4929-8041-5769daf46d8c
-# ╠═e4ebec31-d3b6-46ff-911f-05d7e16ed9e3
-# ╠═098f69ac-a0d4-4f3f-b9d1-e8c860bef94f
-# ╠═6fd98dd1-efca-4d7a-a9ad-c56dae973ab4
-# ╟─40608ffb-14da-4643-8f86-86f20c93001a
+# ╟─681ecbaa-1370-468a-b3d8-7f01b373b3f6
+# ╟─d904f54e-e284-46bb-b7a6-9fae79e01300
+# ╟─5edbb407-3655-45f6-aa9b-8fae111b2eee
+# ╟─4f68effa-b334-4c85-b462-d5c6554e7ea3
 # ╟─6da7221d-55be-41c2-b74d-00e993d299f6
+# ╠═dff61cee-c2c4-41aa-8fc1-fbac08a67beb
 # ╠═3bac1a1e-9bb1-4125-9b58-2bd43d959fa9
 # ╠═b622c2a7-6e74-4b49-9e11-ad5b78508cd9
 # ╠═04a3248a-9705-4c0f-bb44-5647fff61e81
@@ -1880,5 +1920,7 @@ version = "1.4.1+1"
 # ╠═d44450c2-fff7-4c4d-8231-57baab6cc404
 # ╠═229dec7b-d92c-4c74-8a9f-fe21c3b0fb0d
 # ╠═f8129573-5a9f-4989-a9f4-16659ef9b9af
+# ╠═96e27383-8c0b-4b95-b7fb-80bb97f390bb
+# ╠═5275bb7b-944d-4c25-a46d-44bda09d07e1
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
