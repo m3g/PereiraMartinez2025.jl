@@ -1,11 +1,14 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.19.47
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 96e27383-8c0b-4b95-b7fb-80bb97f390bb
 import Pkg
+
+# ╔═╡ 01a07aff-1033-4a98-b01b-e19d9831c92e
+using CSV
 
 # ╔═╡ dff61cee-c2c4-41aa-8fc1-fbac08a67beb
 using Trapz
@@ -21,6 +24,9 @@ using Unitful
 
 # ╔═╡ 3b7d6a34-d8a3-4ad5-bf04-6fc2ccfe6bb3
 using Plots
+
+# ╔═╡ 3bf4a1c6-567f-4cdd-a881-b3acf5a25ee0
+using ColorSchemes
 
 # ╔═╡ d44450c2-fff7-4c4d-8231-57baab6cc404
 using LaTeXStrings
@@ -52,7 +58,7 @@ $$\left(\frac{\partial\mu_2}{\partial m_3}\right)_{T,P,m_2} =
 """
 
 # ╔═╡ e5aedbda-67e9-465e-91f1-10125bee8dc0
-md"where, in the case of TMAO (species 3) and BpdA (solute, species 2) we have:"
+md"where, in the case of TMAO (species 3) and BdpA (solute, species 2) we have:"
 
 # ╔═╡ f9e5b61b-330d-40ee-8667-7af9012a6f62
 M3 = 75.10966u"g/mol"
@@ -69,13 +75,13 @@ and $\partial g_3\partial g_2$ are the preferential interaction parameters and $
 md"""
 ### States considered
 
-Here, three fold states are considered, from the set obtained in the simulations: the native state and two denatured state:
+Here, three-fold states are considered, from the set obtained in the simulations: the native state and two denatured states:
 
-- Native state: Most representative structure of the $N^8_{100}$ basin.
-- First denatured state: Most reprentative structure of the $U^{2.1}_{25}$ basin.
-- Second denatured state: Most reprentative structure of the $U^{6}_{50}$ basin.
+- Native state: Most representative structure of the $N^{B0}_{84}$ basin.
+- First denatured state: Most reprensentative structure of the $U^{B1}_{63}$ basin.
+- Second denatured state: Most representative structure of the $U^{B11}_{37}$ basin.
 
-These states will be referred to as **N** and **U1** and **U2** from here on.
+From here on, these states will be referred to as **N**, **U1**, and **U2**.
 """
 
 # ╔═╡ fb3f40bf-4b4b-4992-9eb7-667d8b12fe64
@@ -85,13 +91,13 @@ md"The molalities of TMAO in the bulk phase of each simulated concentration are:
 md"### Simulated preferential interactions:"
 
 # ╔═╡ bb81d137-effe-4107-a61b-fd529cff8421
-md"The preferential interaction parameters of BpdA in TMAO, for the N, U1, and U2 states, are (converted from mol/mol to g/g):"
+md"The preferential interaction parameters of BdpA in TMAO, for the N, U1, and U2 states, are (converted from mol/mol to g/g):"
 
 # ╔═╡ 813427fb-7d88-44f3-b118-2d5b94031a50
 ∂g₃∂g₂ = DataFrame(
-	"N" => [ -0.20907, -0.52504, -0.71834, -0.97952, -0.85525 ] / (M2/M3),
-	"U1" => [ -0.20389, -0.58105, -0.78167, -0.91497, -1.02542 ] / (M2/M3),
-	"U2" => [ -0.23560, -0.51970, -0.63994, -0.90047, -0.94245 ] / (M2/M3),
+	"N" => [ -0.6178584950043506, -1.2632914704500162, -1.6663788380914255, -2.4841901360017262, -2.9516900248551488, -4.266619697689666, -5.298461030194024 ] / (M2/M3),
+	"U1" => [ -0.5842979696056685, -1.2556611548447076, -1.7776939863791448, -2.2175379501180905, -2.897113503069011, -4.244671476728979, -5.431513490667847 ] / (M2/M3),
+	"U2" => [ -0.7421410365241802, -1.569377714399738, -2.378693340831822, -3.046665283847303, -3.7188008526255354, -5.409891551092739, -7.0323853763401685 ] / (M2/M3),
 )
 
 # ╔═╡ 4b30017b-ef13-45f1-8303-13a87b154841
@@ -122,18 +128,25 @@ Now we can plot those values as function of the concentration of TMAO:
 
 # ╔═╡ 681ecbaa-1370-468a-b3d8-7f01b373b3f6
 md"""
-The shaded areas are, qualitatively, the transfer free energy of each state up to each concentration. 
-
-The plot shows that at very low concentrations, the native state has a lower transfer free energy to TMAO than the denatured states. Thus, at this low concentration, the native state is stabilized in TMAO relative to the denatured states. 
-
-At higher TMAO concentrations the integrals associated to the denatured states become progressively more negative, thus the denatured states are stabilized relative to the native state upon transfer to a TMAO solution. 
+The shaded areas are, qualitatively, the transfer free energy of each state up to each concentration.
 
 Integrating these curves provides a qualitative measure of the free energy of transfer in each case:
 """
 
+# ╔═╡ d904f54e-e284-46bb-b7a6-9fae79e01300
+#Δμ₂_N = trapz(simulated_m₃[!,"N"],∂μ₂∂m₃_sim[!,"N"])
+
+# ╔═╡ 5edbb407-3655-45f6-aa9b-8fae111b2eee
+#Δμ₂_U1 = trapz(simulated_m₃[!,"U1"],∂μ₂∂m₃_sim[!,"U1"])
+
+# ╔═╡ 62629866-b03e-4a61-b3fa-b6a12e3aa7c8
+#Δμ₂_U2 = trapz(simulated_m₃[!,"U2"],∂μ₂∂m₃_sim[!,"U2"])
+
 # ╔═╡ 4f68effa-b334-4c85-b462-d5c6554e7ea3
 md"""
-Implying the the denatured states are slightly more favorably transfered to a 0.5 mol/L aqueous TMAO solution than the native state. The difference probably increases with increasing TMAO concentration.
+The results imply that the U2 denatured state is slightly less favorably transferred to a 0.5 mol/L aqueous TMAO solution than the native state. The difference increases with increasing TMAO concentration. At higher TMAO concentrations the integrals associated with this state become progressively more positive, thus the U2 denatured state is destabilized relative to the native state upon transfer to a TMAO solution.
+
+In contrast, the U1 unfolded state is structurally similar to the native and almost equally destabilized as the native state in all concentrations, illustrating the possible complexity of its effects on the folding landscape of BdpA.
 """
 
 # ╔═╡ 3b976cdf-09d2-4c43-881c-c1eadb4ea238
@@ -237,9 +250,9 @@ md"For the N and U states, the obtained bulk concentrations of TMAO are obtained
 
 # ╔═╡ 14f768ba-30e1-4fbb-ba80-70065873a830
 c = DataFrame(
-    "N" => [0.098225, 0.20105, 0.31015, 0.41752, 0.51198 ]u"mol/L",
-	"U1" => [0.10418, 0.20968, 0.30651, 0.41205, 0.51438 ]u"mol/L",
-	"U2" => [0.10083, 0.20368, 0.31014, 0.41395, 0.50719 ]u"mol/L",
+        "N" => [ 0.10523694289865375, 0.2090115982846453, 0.30968720053870313, 0.42099751245180794, 0.5250170267606381, 0.7875527577669823, 1.0408644231246678 ]u"mol/L",
+	"U1" => [ 0.10381962658043828, 0.2127502033363669, 0.3084682867546046, 0.41546034057023934, 0.5232714257404598, 0.7893985189346775, 1.0491454156074052 ]u"mol/L",
+	"U2" => [ 0.10218170983890866, 0.21034088475386165, 0.3185094642363852, 0.4180838129664727, 0.5288241751838576, 0.7851016629307532, 1.0481664806448885 ]u"mol/L"
 )
 
 # ╔═╡ dbcd0df8-c2ee-4ba0-bcb5-75fe898b6f0f
@@ -259,21 +272,6 @@ simulated_m₃ = DataFrame(
 	"U2" => uconvert.(u"mol/kg", c[!,"U2"] ./ ρ[!,"U2"]),
 )
 
-# ╔═╡ 4d8bfae0-2eda-462b-a9ec-c0082097305d
-begin
-	p3 = scatter(MolSimStyle,
-		simulated_m₃[!,"N"], ∂g₃∂g₂[!,"N"], label="N",
-		xlabel=L"m_3", ylabel=L"\partial g_2\partial g_3 \mathrm{(g/g)}",
-	)
-	scatter!(p3,
-		simulated_m₃[!,"U1"], ∂g₃∂g₂[!,"U1"], label="U1",
-	)
-	scatter!(p3,
-		simulated_m₃[!,"U2"], ∂g₃∂g₂[!,"U2"], label="U2",
-	)
-	plot!(p3, size=(400,300))
-end
-
 # ╔═╡ 9fa845c7-dd1e-40ea-9cd9-6126783aad94
 ∂μ₂∂m₃_sim = DataFrame(
     "N" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"N"], simulated_m₃[!,"N"], M2, M3),
@@ -285,31 +283,81 @@ end
 begin
 	p2 = plot()
 	states = ["N", "U1", "U2"]
-	colors = [:blue, :orange, :green]
+	labels = [ L"{\mathrm{N^{B0}_{84}}}", L"{\mathrm{U^{B1}_{63}}}", L"{\mathrm{U^{B11}_{37}}}" ]
+    colors = [ get(ColorSchemes.okabe_ito,(12)/12), get(ColorSchemes.okabe_ito,(11)/12), get(ColorSchemes.okabe_ito,(1)/12)]
 	for i in eachindex(states)
 		s = states[i]
 		c = colors[i]
 	    p2 = scatter!(MolSimStyle,
-	    	simulated_m₃[!,s], ∂μ₂∂m₃_sim[!,s], label=s,
+	    	simulated_m₃[!,s], ∂μ₂∂m₃_sim[!,s], label=labels[i],
 	 		xlabel=L"m_3", ylabel=L"\partial\mu_2\partial m_3",
-			color=c,
+			color=c, dpi=300
 		)
 		plot!(p2, 
 			simulated_m₃[!,s], ∂μ₂∂m₃_sim[!,s], label=nothing,
-			fillrange=(0:0.5), fc=c, alpha=0.1, 
+			fillrange=(0:0.5), fc=c, alpha=0.1, dpi=300
 		)
 	end
 	plot!(p2, size=(400,300))
+	#savefig("proteinA_TMAO_TFE.pdf")
 end
 
-# ╔═╡ d904f54e-e284-46bb-b7a6-9fae79e01300
-Δμ₂_N = trapz(simulated_m₃[!,"N"],∂μ₂∂m₃_sim[!,"N"])
+# ╔═╡ 4d8bfae0-2eda-462b-a9ec-c0082097305d
+begin
+	p3 = scatter(MolSimStyle,
+		simulated_m₃[!,"N"], ∂g₃∂g₂[!,"N"], label=L"{\mathrm{N^{B0}_{84}}}",
+		xlabel=L"m_3", ylabel=L"\partial g_2\partial g_3 \mathrm{(g/g)}",
+		color=colors[1]
+	)
+	scatter!(p3,
+		simulated_m₃[!,"U1"], ∂g₃∂g₂[!,"U1"], label=L"{\mathrm{U^{B8}_{17}}}",
+		color=colors[2],
+	)
+	scatter!(p3,
+		simulated_m₃[!,"U2"], ∂g₃∂g₂[!,"U2"], label=L"{\mathrm{U^{B11}_{37}}}",
+		color=colors[3], dpi=300
+	)
+	plot!(p3, size=(400,300))
+	#savefig("proteinA_TMAO_Γ.pdf")
+end
 
-# ╔═╡ 5edbb407-3655-45f6-aa9b-8fae111b2eee
-Δμ₂_U1 = trapz(simulated_m₃[!,"U1"],∂μ₂∂m₃_sim[!,"U1"])
+# ╔═╡ 11c9f23d-ba98-407f-ba07-40ff3b5ce477
+let
+	
+# Arrays to store results
+Δμ₂_N_values = []
+Δμ₂_U1_values = []
+Δμ₂_U2_values = []
 
-# ╔═╡ 62629866-b03e-4a61-b3fa-b6a12e3aa7c8
-Δμ₂_U2 = trapz(simulated_m₃[!,"U2"],∂μ₂∂m₃_sim[!,"U2"])
+# Compute and store Δμ₂_N
+for i in 2:7
+    Δμ₂_N = trapz(simulated_m₃[1:i, "N"], ∂μ₂∂m₃_sim[1:i, "N"])
+    push!(Δμ₂_N_values, ustrip(Δμ₂_N))
+end
+
+# Compute and store Δμ₂_U1
+for i in 2:7
+    Δμ₂_U1 = trapz(simulated_m₃[1:i, "U1"], ∂μ₂∂m₃_sim[1:i, "U1"])
+    push!(Δμ₂_U1_values, ustrip(Δμ₂_U1))
+end
+
+# Compute and store Δμ₂_U2
+for i in 2:7
+    Δμ₂_U2 = trapz(simulated_m₃[1:i, "U2"], ∂μ₂∂m₃_sim[1:i, "U2"])
+    push!(Δμ₂_U2_values, ustrip(Δμ₂_U2))
+end
+
+# Create a DataFrame
+df = DataFrame(
+    Δμ₂_N = Δμ₂_N_values,
+    Δμ₂_U1 = Δμ₂_U1_values,
+    Δμ₂_U2 = Δμ₂_U2_values
+)
+
+# Save DataFrame to CSV
+#CSV.write("./protein_a_tmao_delta_mu_values.csv", df)
+
+end
 
 # ╔═╡ 6da7221d-55be-41c2-b74d-00e993d299f6
 md"### Packages used"
@@ -323,6 +371,8 @@ VERSION
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 EasyFit = "fde71243-0cda-4261-b7c7-4845bd106b21"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
@@ -334,6 +384,8 @@ Trapz = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
+CSV = "~0.10.15"
+ColorSchemes = "~3.26.0"
 DataFrames = "~1.6.1"
 EasyFit = "~0.6.6"
 LaTeXStrings = "~1.3.1"
@@ -348,9 +400,9 @@ Unitful = "~1.21.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "89eb9cfc874aad1e4304ba045f70c6bb38d1f84f"
+project_hash = "186e9edfd1ae945ccf31bd7e66457c37def820e8"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -379,20 +431,16 @@ uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 version = "1.1.1"
 
 [[deps.ArrayInterface]]
-deps = ["Adapt", "LinearAlgebra"]
-git-tree-sha1 = "3640d077b6dafd64ceb8fd5c1ec76f7ca53bcf76"
+deps = ["Adapt", "LinearAlgebra", "Requires", "SparseArrays", "SuiteSparse"]
+git-tree-sha1 = "c5aeb516a84459e0318a02507d2261edad97eb75"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "7.16.0"
+version = "7.7.1"
 
     [deps.ArrayInterface.extensions]
     ArrayInterfaceBandedMatricesExt = "BandedMatrices"
     ArrayInterfaceBlockBandedMatricesExt = "BlockBandedMatrices"
     ArrayInterfaceCUDAExt = "CUDA"
-    ArrayInterfaceCUDSSExt = "CUDSS"
-    ArrayInterfaceChainRulesExt = "ChainRules"
     ArrayInterfaceGPUArraysCoreExt = "GPUArraysCore"
-    ArrayInterfaceReverseDiffExt = "ReverseDiff"
-    ArrayInterfaceSparseArraysExt = "SparseArrays"
     ArrayInterfaceStaticArraysCoreExt = "StaticArraysCore"
     ArrayInterfaceTrackerExt = "Tracker"
 
@@ -400,11 +448,7 @@ version = "7.16.0"
     BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
     BlockBandedMatrices = "ffab5731-97b5-5995-9138-79e8c1846df0"
     CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
-    CUDSS = "45b445bb-4962-46a0-9369-b4df9d0f772e"
-    ChainRules = "082447d4-558c-5d27-93f4-14fc19e9eca2"
     GPUArraysCore = "46192b85-c4d5-4398-a991-12ede77f4527"
-    ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
-    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
     StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
     Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
 
@@ -430,6 +474,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "9e2a6b69137e6969bab0152632dcb3bc108c8bdd"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.8+1"
+
+[[deps.CSV]]
+deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
+git-tree-sha1 = "deddd8725e5e1cc49ee205a1964256043720a6c3"
+uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+version = "0.10.15"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -670,6 +720,17 @@ git-tree-sha1 = "466d45dc38e15794ec7d5d63ec03d776a9aff36e"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.4+1"
 
+[[deps.FilePathsBase]]
+deps = ["Compat", "Dates"]
+git-tree-sha1 = "7878ff7172a8e6beedd1dea14bd27c3c6340d361"
+uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
+version = "0.9.22"
+weakdeps = ["Mmap", "Test"]
+
+    [deps.FilePathsBase.extensions]
+    FilePathsBaseMmapExt = "Mmap"
+    FilePathsBaseTestExt = "Test"
+
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
@@ -686,10 +747,10 @@ weakdeps = ["PDMats", "SparseArrays", "Statistics"]
     FillArraysStatisticsExt = "Statistics"
 
 [[deps.FiniteDiff]]
-deps = ["ArrayInterface", "LinearAlgebra", "Setfield", "SparseArrays"]
-git-tree-sha1 = "f9219347ebf700e77ca1d48ef84e4a82a6701882"
+deps = ["ArrayInterface", "LinearAlgebra", "Requires", "Setfield", "SparseArrays"]
+git-tree-sha1 = "73d1214fec245096717847c62d389a5d2ac86504"
 uuid = "6a86dc24-6348-571c-b903-95158fe2bd41"
-version = "2.24.0"
+version = "2.22.0"
 
     [deps.FiniteDiff.extensions]
     FiniteDiffBandedMatricesExt = "BandedMatrices"
@@ -770,9 +831,9 @@ version = "0.21.0+0"
 
 [[deps.Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE2_jll", "Zlib_jll"]
-git-tree-sha1 = "7c82e6a6cd34e9d935e9aa4051b66c6ff3af59ba"
+git-tree-sha1 = "674ff0db93fffcd11a3573986e550d66cd4fd71f"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.80.2+0"
+version = "2.80.5+0"
 
 [[deps.Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -873,9 +934,9 @@ version = "0.21.4"
 
 [[deps.JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "c84a835e1a09b289ffcd2271bf2a337bbdda6637"
+git-tree-sha1 = "25ee0be4d43d0269027024d75a24c24d6c6e590c"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
-version = "3.0.3+0"
+version = "3.0.4+0"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1163,9 +1224,9 @@ version = "10.42.0+1"
 
 [[deps.PDBTools]]
 deps = ["AtomsBase", "Dates", "Downloads", "Format", "InteractiveUtils", "LinearAlgebra", "OrderedCollections", "Parameters", "Printf", "StaticArrays", "TestItems"]
-git-tree-sha1 = "8afae25c01a934f6f07e8a5fbdc045141c2fde5b"
+git-tree-sha1 = "1dc699af5def53756abe38ea96d6f6aa3e4706da"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
-version = "1.8.4"
+version = "1.8.5"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
@@ -1271,9 +1332,9 @@ version = "1.4.3"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "1101cd475833706e4d0e7b122218257178f48f34"
+git-tree-sha1 = "66b20dd35966a748321d3b2537c4584cf40387c7"
 uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.4.0"
+version = "2.3.2"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1501,9 +1562,9 @@ version = "1.3.2"
 
 [[deps.StringManipulation]]
 deps = ["PrecompileTools"]
-git-tree-sha1 = "a6b1675a536c5ad1a60e5a5153e1fee12eb146e3"
+git-tree-sha1 = "a04cabe79c5f01f4d723cc6704070ada0b9d46d5"
 uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.4.0"
+version = "0.3.4"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -1637,6 +1698,17 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "93f43ab61b16ddfb2fd3bb13b3ce241cafb0e6c9"
 uuid = "2381bf8a-dfd0-557d-9999-79630e7b1b91"
 version = "1.31.0+0"
+
+[[deps.WeakRefStrings]]
+deps = ["DataAPI", "InlineStrings", "Parsers"]
+git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
+uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
+version = "1.4.2"
+
+[[deps.WorkerUtilities]]
+git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
+uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
+version = "1.6.1"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
@@ -1807,9 +1879,9 @@ version = "1.2.13+1"
 
 [[deps.Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "e678132f07ddb5bfa46857f0d7620fb9be675d3b"
+git-tree-sha1 = "555d1076590a6cc2fdee2ef1469451f872d8b41b"
 uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
-version = "1.5.6+0"
+version = "1.5.6+1"
 
 [[deps.eudev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "gperf_jll"]
@@ -1844,7 +1916,7 @@ version = "0.15.2+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.11.0+0"
+version = "5.8.0+1"
 
 [[deps.libdecor_jll]]
 deps = ["Artifacts", "Dbus_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pango_jll", "Wayland_jll", "xkbcommon_jll"]
@@ -1872,9 +1944,9 @@ version = "1.18.0+0"
 
 [[deps.libpng_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "d7015d2e18a5fd9a4f47de711837e980519781a4"
+git-tree-sha1 = "b70c870239dc3d7bc094eb2d6be9b73d27bef280"
 uuid = "b53b4c65-9356-5827-b1ea-8c7a1a84506f"
-version = "1.6.43+1"
+version = "1.6.44+0"
 
 [[deps.libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
@@ -1944,9 +2016,10 @@ version = "1.4.1+1"
 # ╟─da89afa4-43bc-4906-b01b-9f6ec455f229
 # ╟─025fed74-93a2-4bb9-96b6-9e4c1a00c75d
 # ╟─681ecbaa-1370-468a-b3d8-7f01b373b3f6
-# ╟─d904f54e-e284-46bb-b7a6-9fae79e01300
-# ╟─5edbb407-3655-45f6-aa9b-8fae111b2eee
-# ╟─62629866-b03e-4a61-b3fa-b6a12e3aa7c8
+# ╠═d904f54e-e284-46bb-b7a6-9fae79e01300
+# ╠═5edbb407-3655-45f6-aa9b-8fae111b2eee
+# ╠═62629866-b03e-4a61-b3fa-b6a12e3aa7c8
+# ╟─11c9f23d-ba98-407f-ba07-40ff3b5ce477
 # ╟─4f68effa-b334-4c85-b462-d5c6554e7ea3
 # ╟─3b976cdf-09d2-4c43-881c-c1eadb4ea238
 # ╟─19208b6e-7039-11ef-2685-c9fd57102877
@@ -1972,11 +2045,13 @@ version = "1.4.1+1"
 # ╟─dbcd0df8-c2ee-4ba0-bcb5-75fe898b6f0f
 # ╟─5a27e717-91ff-4d60-9e57-d32330121090
 # ╟─6da7221d-55be-41c2-b74d-00e993d299f6
+# ╠═01a07aff-1033-4a98-b01b-e19d9831c92e
 # ╠═dff61cee-c2c4-41aa-8fc1-fbac08a67beb
 # ╠═3bac1a1e-9bb1-4125-9b58-2bd43d959fa9
 # ╠═b622c2a7-6e74-4b49-9e11-ad5b78508cd9
 # ╠═04a3248a-9705-4c0f-bb44-5647fff61e81
 # ╠═3b7d6a34-d8a3-4ad5-bf04-6fc2ccfe6bb3
+# ╠═3bf4a1c6-567f-4cdd-a881-b3acf5a25ee0
 # ╠═d44450c2-fff7-4c4d-8231-57baab6cc404
 # ╠═229dec7b-d92c-4c74-8a9f-fe21c3b0fb0d
 # ╠═f8129573-5a9f-4989-a9f4-16659ef9b9af
