@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.47
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -132,15 +132,6 @@ The shaded areas are, qualitatively, the transfer free energy of each state up t
 
 Integrating these curves provides a qualitative measure of the free energy of transfer in each case:
 """
-
-# ╔═╡ d904f54e-e284-46bb-b7a6-9fae79e01300
-#Δμ₂_N = trapz(simulated_m₃[!,"N"],∂μ₂∂m₃_sim[!,"N"])
-
-# ╔═╡ 5edbb407-3655-45f6-aa9b-8fae111b2eee
-#Δμ₂_U1 = trapz(simulated_m₃[!,"U1"],∂μ₂∂m₃_sim[!,"U1"])
-
-# ╔═╡ 62629866-b03e-4a61-b3fa-b6a12e3aa7c8
-#Δμ₂_U2 = trapz(simulated_m₃[!,"U2"],∂μ₂∂m₃_sim[!,"U2"])
 
 # ╔═╡ 4f68effa-b334-4c85-b462-d5c6554e7ea3
 md"""
@@ -399,7 +390,7 @@ Unitful = "~1.21.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.8"
 manifest_format = "2.0"
 project_hash = "186e9edfd1ae945ccf31bd7e66457c37def820e8"
 
@@ -1921,7 +1912,7 @@ version = "0.15.2+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+1"
+version = "5.11.0+0"
 
 [[deps.libdecor_jll]]
 deps = ["Artifacts", "Dbus_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pango_jll", "Wayland_jll", "xkbcommon_jll"]
@@ -2009,7 +2000,7 @@ version = "1.4.1+2"
 # ╟─bb81d137-effe-4107-a61b-fd529cff8421
 # ╟─813427fb-7d88-44f3-b118-2d5b94031a50
 # ╟─4b30017b-ef13-45f1-8303-13a87b154841
-# ╠═4d8bfae0-2eda-462b-a9ec-c0082097305d
+# ╟─4d8bfae0-2eda-462b-a9ec-c0082097305d
 # ╟─b188c630-5beb-40e3-9b92-260b385fc295
 # ╟─e3e99ddc-36ea-4b53-bb07-753670a013db
 # ╟─12fa8a68-6fed-4d1f-ac71-864ca078c5a7
@@ -2019,11 +2010,8 @@ version = "1.4.1+2"
 # ╟─53c3949d-6e77-4606-8882-db4a798eed2c
 # ╟─9fa845c7-dd1e-40ea-9cd9-6126783aad94
 # ╟─da89afa4-43bc-4906-b01b-9f6ec455f229
-# ╠═025fed74-93a2-4bb9-96b6-9e4c1a00c75d
+# ╟─025fed74-93a2-4bb9-96b6-9e4c1a00c75d
 # ╟─681ecbaa-1370-468a-b3d8-7f01b373b3f6
-# ╠═d904f54e-e284-46bb-b7a6-9fae79e01300
-# ╠═5edbb407-3655-45f6-aa9b-8fae111b2eee
-# ╠═62629866-b03e-4a61-b3fa-b6a12e3aa7c8
 # ╟─503c33d8-cd92-4651-95f8-5be1296a7f57
 # ╟─4f68effa-b334-4c85-b462-d5c6554e7ea3
 # ╟─3b976cdf-09d2-4c43-881c-c1eadb4ea238
@@ -2034,16 +2022,16 @@ version = "1.4.1+2"
 # ╟─1ca88373-114c-464d-aaac-9f3b25893820
 # ╟─90ad306d-163e-4fb3-a00e-6b86c32900f9
 # ╟─357f0851-8ba2-4dbe-9c49-e5bd15f3f93b
-# ╠═e30af672-9c42-4d19-8b5b-dbf1dc0d9680
+# ╟─e30af672-9c42-4d19-8b5b-dbf1dc0d9680
 # ╟─c08a180a-e8cf-4f02-9451-1d40fb96a653
 # ╠═f9ec92d4-4ab4-4a9c-b240-7fe5d28e0018
 # ╟─24202850-e8fa-4172-91f9-d31ad67e0d3e
 # ╟─c18b8343-1911-4864-918f-2083637524d7
-# ╠═72b526a6-6e22-40a1-ac76-8f766681ff87
+# ╟─72b526a6-6e22-40a1-ac76-8f766681ff87
 # ╟─7027914f-2195-472e-968e-c5e587b84dba
 # ╟─c1940fde-3164-40e7-8679-c16e872c38b8
 # ╟─b18ed62a-9b12-467d-b289-7720a45817d3
-# ╠═d4efcd42-14e6-46f0-85b7-0c917b09e7a1
+# ╟─d4efcd42-14e6-46f0-85b7-0c917b09e7a1
 # ╟─dd52ea0b-db95-4d07-8d12-cea548508033
 # ╟─04514294-71e6-4185-b5a0-35eb09066e6f
 # ╟─14f768ba-30e1-4fbb-ba80-70065873a830
