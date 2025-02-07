@@ -9,4 +9,4 @@ Institute of Chemistry and Center for Computing in Engineering & Science, Univer
 
 ## Contents
 
-Data and codes necessary for the computations here reported and detailed reproduction of the computation of transfer free energies.
+Data and codes necessary detailed reproduction of the computation of transfer free energies.

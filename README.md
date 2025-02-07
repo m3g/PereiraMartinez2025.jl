@@ -9,7 +9,7 @@ Institute of Chemistry and Center for Computing in Engineering & Science, Univer
 
 ## Contents
 
-Data and codes necessary for the computations here reported and detailed reproduction of the computation of transfer free energies.
+Data and codes necessary for the detailed reproduction of the computation of transfer free energies.
 
 [CLICK HERE!](https://m3g.github.io/PereiraMartinez2024.jl/dev)
 
