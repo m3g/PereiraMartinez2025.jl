@@ -203,9 +203,6 @@ md"""
 Which can be computed for the concentrations given in Table 2 of the article, and do not agree quantitatively, but follow the same trend:
 """
 
-# ╔═╡ c18b8343-1911-4864-918f-2083637524d7
-tmao_data[:, :∂lnγ₃∂m₃] = ∂lnγ₃∂m₃.(tmao_data[!,:m₃])
-
 # ╔═╡ 72b526a6-6e22-40a1-ac76-8f766681ff87
 tmao_data
 
@@ -2017,16 +2014,15 @@ version = "1.4.1+1"
 # ╟─1ca88373-114c-464d-aaac-9f3b25893820
 # ╟─90ad306d-163e-4fb3-a00e-6b86c32900f9
 # ╟─357f0851-8ba2-4dbe-9c49-e5bd15f3f93b
-# ╠═e30af672-9c42-4d19-8b5b-dbf1dc0d9680
+# ╟─e30af672-9c42-4d19-8b5b-dbf1dc0d9680
 # ╟─c08a180a-e8cf-4f02-9451-1d40fb96a653
 # ╠═f9ec92d4-4ab4-4a9c-b240-7fe5d28e0018
 # ╟─24202850-e8fa-4172-91f9-d31ad67e0d3e
-# ╟─c18b8343-1911-4864-918f-2083637524d7
-# ╠═72b526a6-6e22-40a1-ac76-8f766681ff87
+# ╟─72b526a6-6e22-40a1-ac76-8f766681ff87
 # ╟─7027914f-2195-472e-968e-c5e587b84dba
 # ╟─c1940fde-3164-40e7-8679-c16e872c38b8
 # ╟─b18ed62a-9b12-467d-b289-7720a45817d3
-# ╠═d4efcd42-14e6-46f0-85b7-0c917b09e7a1
+# ╟─d4efcd42-14e6-46f0-85b7-0c917b09e7a1
 # ╟─dd52ea0b-db95-4d07-8d12-cea548508033
 # ╟─04514294-71e6-4185-b5a0-35eb09066e6f
 # ╟─14f768ba-30e1-4fbb-ba80-70065873a830
