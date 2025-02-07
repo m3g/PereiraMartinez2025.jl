@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.47
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -132,15 +132,6 @@ The shaded areas are, qualitatively, the transfer free energy of each state up t
 
 Integrating these curves provides a qualitative measure of the free energy of transfer in each case:
 """
-
-# ╔═╡ d904f54e-e284-46bb-b7a6-9fae79e01300
-#Δμ₂_N = trapz(simulated_m₃[!,"N"],∂μ₂∂m₃_sim[!,"N"])
-
-# ╔═╡ 5edbb407-3655-45f6-aa9b-8fae111b2eee
-#Δμ₂_U1 = trapz(simulated_m₃[!,"U1"],∂μ₂∂m₃_sim[!,"U1"])
-
-# ╔═╡ 62629866-b03e-4a61-b3fa-b6a12e3aa7c8
-#Δμ₂_U2 = trapz(simulated_m₃[!,"U2"],∂μ₂∂m₃_sim[!,"U2"])
 
 # ╔═╡ 4f68effa-b334-4c85-b462-d5c6554e7ea3
 md"""
@@ -400,7 +391,7 @@ Unitful = "~1.21.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.8"
 manifest_format = "2.0"
 project_hash = "186e9edfd1ae945ccf31bd7e66457c37def820e8"
 
@@ -1916,7 +1907,7 @@ version = "0.15.2+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+1"
+version = "5.11.0+0"
 
 [[deps.libdecor_jll]]
 deps = ["Artifacts", "Dbus_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pango_jll", "Wayland_jll", "xkbcommon_jll"]
@@ -2016,9 +2007,6 @@ version = "1.4.1+1"
 # ╟─da89afa4-43bc-4906-b01b-9f6ec455f229
 # ╟─025fed74-93a2-4bb9-96b6-9e4c1a00c75d
 # ╟─681ecbaa-1370-468a-b3d8-7f01b373b3f6
-# ╠═d904f54e-e284-46bb-b7a6-9fae79e01300
-# ╠═5edbb407-3655-45f6-aa9b-8fae111b2eee
-# ╠═62629866-b03e-4a61-b3fa-b6a12e3aa7c8
 # ╟─11c9f23d-ba98-407f-ba07-40ff3b5ce477
 # ╟─4f68effa-b334-4c85-b462-d5c6554e7ea3
 # ╟─3b976cdf-09d2-4c43-881c-c1eadb4ea238
