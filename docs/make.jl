@@ -29,7 +29,7 @@ for nb in nbs
 end
 
 makedocs(
-    sitename = "PereiraMartinez2024.jl",
+    sitename = "PereiraMartinez2025.jl",
     format=Documenter.HTML(;
         mathengine=Documenter.MathJax3(),
         size_threshold_ignore=[
@@ -52,7 +52,7 @@ makedocs(
     ],
 )
 deploydocs(
-    repo = "github.com/m3g/PereiraMartinez2024.jl.git",
+    repo = "github.com/m3g/PereiraMartinez2025.jl.git",
     target = "build",
     branch = "gh-pages",
     versions = ["stable" => "v^", "v#.#"],

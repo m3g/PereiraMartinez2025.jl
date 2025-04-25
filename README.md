@@ -1,7 +1,9 @@
 
 # Supplementary Information
 
-**Osmolyte-Induced Structural and Thermodynamic Effects on the Protein Folding Landscape**
+Computation of transfer free-energies.
+
+**Dispersive interactions determine osmolyte thermodynamic effects across the protein folding landscape**
 
 A. F. Pereira, L. Martínez
 
@@ -11,5 +13,5 @@ Institute of Chemistry and Center for Computing in Engineering & Science, Univer
 
 Data and codes necessary for the detailed reproduction of the computation of transfer free energies.
 
-[CLICK HERE!](https://m3g.github.io/PereiraMartinez2025.jl/dev)
+[CLICK HERE!](https://m3g.github.io/PereiraMartinez2025.jl/)
 

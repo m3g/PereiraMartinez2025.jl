@@ -1,6 +1,6 @@
-using PereiraMartinez2024
+using PereiraMartinez2025
 using Test
 
-@testset "PereiraMartinez2024.jl" begin
+@testset "PereiraMartinez2025.jl" begin
     # Write your tests here.
 end
