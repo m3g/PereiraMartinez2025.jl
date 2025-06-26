@@ -3,7 +3,7 @@
 
 Computation of transfer free-energies.
 
-**Dispersive interactions determine osmolyte thermodynamic effects across the protein folding landscape**
+**Osmolyte structural and thermodynamic effects across the protein folding landscape**
 
 A. F. Pereira, L. Martínez
 
