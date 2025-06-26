@@ -1,7 +1,7 @@
 name = "PereiraMartinez2025"
 uuid = "a5a4965e-6774-4fb4-b0b8-7072333bc421"
 authors = ["Leandro Martinez <lmartine@unicamp.br> and contributors"]
-version = "2.0.0"
+version = "3.0.0"
 
 [compat]
 julia = "1.6.7"
