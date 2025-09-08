@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.10
 
 using Markdown
 using InteractiveUtils
@@ -98,7 +98,7 @@ Which can be computed for the concentrations given in Table 2 of the article, an
 """
 
 # ╔═╡ 72b526a6-6e22-40a1-ac76-8f766681ff87
-urea_data
+ DataFrame("m₃" => urea_data[:,1], "∂lnγ₃∂m₃" => ∂lnγ₃∂m₃.(urea_data[:,1]), "Lin & Timasheff" =>[ missing, -0.076, -0.068, -0.059])
 
 # ╔═╡ 7027914f-2195-472e-968e-c5e587b84dba
 md"We also obtain an expression for the density as a function of the concentration, in mol/L:"
@@ -156,7 +156,7 @@ The RNase-T1 and RCM-T1 constructos of the article, modeling the native and dena
 md"### Converting concentrations:"
 
 # ╔═╡ 04514294-71e6-4185-b5a0-35eb09066e6f
-md"For the N and U states, the obtained bulk concentrations of urea are obtained from the simulations:"
+md"For the N and U states, Lin and Timasheff report the transfer free energies at 2M, and provide dta for computing intermediate parameters for smaller concentrations, which are:"
 
 
 # ╔═╡ 14f768ba-30e1-4fbb-ba80-70065873a830
@@ -175,22 +175,24 @@ md"The densities corresponding to these concentrations, according to the experim
 )
 
 # ╔═╡ fb3f40bf-4b4b-4992-9eb7-667d8b12fe64
-md"With which we can compute the molality of urea in each simulated concentration:"
+md"With which we can compute the molality of urea in each concentration of interest:"
 
 # ╔═╡ 23095d73-0957-450e-8537-72431506fd4d
 simulated_m₃ = DataFrame(
 	"N" => uconvert.(u"mol/kg", c[!,"N"] ./ ρ[!,"N"]),
 	"U" => uconvert.(u"mol/kg", c[!,"U"] ./ ρ[!,"U"]),
+	"exp" => [0.51, 1.05, 2.20]u"mol/kg"
 )
 
 # ╔═╡ b2529e4f-a312-4adc-adf2-3f1f70a7b35f
 md"### Preferential interactions:"
 
 # ╔═╡ bb81d137-effe-4107-a61b-fd529cff8421
-md"The preferential interaction parameters of BdpA in urea, for the N8 and U6 states, are:"
+md"The preferential interaction parameters of BdpA in urea, for the N8 and U6 states (RNaseT1 and RCM-T1 from Table 3 of Lin & Timasheff), are:"
 
 # ╔═╡ 813427fb-7d88-44f3-b118-2d5b94031a50
 ∂g₃∂g₂ = DataFrame(
+	"c" => c[:,1],
 	"N" => [0.0244, 0.0345, 0.0647],
 	"U" => [0.0247, 0.0542, 0.1445],
 )
@@ -231,13 +233,16 @@ md"Applying this equation to the three possible sets of parameters for the three
 
 # ╔═╡ 9fa845c7-dd1e-40ea-9cd9-6126783aad94
 ∂μ₂∂m₃_sim = DataFrame(
-    "N" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"N"], simulated_m₃[!,"N"], M2, M3),
-	"U" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"U"], simulated_m₃[!,"U"], M2, M3),
+	"c" => c[:,1],
+    "N" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"N"], simulated_m₃[!,"exp"], M2, M3),
+	"U" => ∂μ₂∂m₃.(∂g₃∂g₂[!,"U"], simulated_m₃[!,"exp"], M2, M3),
+	"N_exp" => [-4.915, -3.289, -2.801],
+	"U_exp" => [-5.096, -5.268, -6.382],
 )
 
 # ╔═╡ da89afa4-43bc-4906-b01b-9f6ec455f229
 md"""
-Now we can plot those values as function of the concentration of urea:
+Now we can plot those values as function of the concentration of urea (stars correspond to the exact experimental values reported by Lin & Timasheff):
 """
 
 # ╔═╡ 025fed74-93a2-4bb9-96b6-9e4c1a00c75d
@@ -259,6 +264,15 @@ begin
 		simulated_m₃[!,"U"], ∂μ₂∂m₃_sim[!,"U"], label=nothing,
 		fillrange=(0:0.5), fc=:orange, alpha=0.1, 
 	)
+	scatter!(p2, 
+		simulated_m₃[!,"U"], ∂μ₂∂m₃_sim[!,"N_exp"], label=nothing,
+		color=:blue, markershape=:star, alpha=0.5,
+	)
+
+	scatter!(p2, 
+		simulated_m₃[!,"U"], ∂μ₂∂m₃_sim[!,"U_exp"], label=nothing,
+		color=:orange, markershape=:star, alpha=0.5,
+	)
 	plot!(p2, size=(400,300))
 end
 
@@ -279,11 +293,51 @@ Integrating these curves provides a qualitative measure of the free energy of tr
 # ╔═╡ 5edbb407-3655-45f6-aa9b-8fae111b2eee
 Δμ₂_U = trapz(simulated_m₃[!,"U"],∂μ₂∂m₃_sim[!,"U"])
 
+# ╔═╡ dbd33e76-8964-42d6-ac34-6e13f48d4742
+md"which implies"
+
+# ╔═╡ c557e9ad-30dd-45a2-8222-7773c006b4f8
+δΔμ₂ = Δμ₂_U - Δμ₂_N
+
 # ╔═╡ 4f68effa-b334-4c85-b462-d5c6554e7ea3
 md"""
-Implying the the denatured state is more favorably transfered to a 0.5 mol/L aqueous urea solution than the native state.
+Implying the the denatured state is more favorably transfered to a 2.0 mol/L aqueous urea solution than the native state. Lin & Timasheff reported the value of -3.561±1 kcal/mol, which is consistent considering the data manipulation.
+"""
 
-The data above differs from that reported in the paper because they extrapolate the curves to low concentrations, adding an additional constant factor to both energy transfers. Nevertheless, the trends are similar, and indicate that at concentrations higher than $~$0.4 mol/L urea distabilizes the protein, being the effect subtler and perhaps opposite at lower concentrations.
+# ╔═╡ 762d7dd3-56ad-4a6c-93b0-b63e76f264ea
+md"""
+##### Integrating by linear approximation
+
+Instead of using the trapezoidal rule for integrating the above plot, we can also approximate each curve by a line $$y = ax + b$$ such that the integral is simply $$a x^2 + bx$$, similarly using a quadradic model. This appears to be closer to what Lin & Timasheff did:
+"""
+
+# ╔═╡ d45f3100-f19e-43e8-8c00-8d857d35c7a1
+fit_linear_U = fitlinear(simulated_m₃[!,"exp"], ∂μ₂∂m₃_sim[!,"U"]);
+
+# ╔═╡ eefaddb7-7438-47e0-9681-3228ed639bc0
+fit_quad_U = fitquad(simulated_m₃[!,"exp"], ∂μ₂∂m₃_sim[!,"U"]);
+
+# ╔═╡ ae6d4b8c-ea7d-41f5-a868-d6c25d05e1a2
+fit_linear_N = fitlinear(simulated_m₃[!,"exp"], ∂μ₂∂m₃_sim[!,"N"]);
+
+# ╔═╡ da1ad389-3f1a-46ec-b147-3191b2f09028
+fit_quad_N = fitquad(simulated_m₃[!,"exp"], ∂μ₂∂m₃_sim[!,"N"]);
+
+# ╔═╡ 2033fe77-f353-410c-8098-970edf8cd45a
+md"such that"
+
+# ╔═╡ 1204b448-18a1-459b-85d6-d7d9fa61a236
+DataFrame(
+"c" => c[:,1],
+ "Δμ₂_N (linear)" => (@. fit_linear_N.a * simulated_m₃[!,"N"]^2 + fit_linear_N.b * simulated_m₃[!,"N"]),
+ "Δμ₂_U (linear)" => (@. fit_linear_U.a * simulated_m₃[!,"U"]^2 + fit_linear_U.b * simulated_m₃[!,"U"]),
+"Δμ₂_N (quad)" => (@. fit_quad_N.a * simulated_m₃[!,"N"]^3  + fit_quad_N.b * simulated_m₃[!,"N"]^2 + fit_quad_N.c * simulated_m₃[!,"N"]),
+"Δμ₂_U (quad)" => (@. fit_quad_U.a * simulated_m₃[!,"N"]^3  + fit_quad_U.b * simulated_m₃[!,"N"]^2 + fit_quad_U.c * simulated_m₃[!,"N"]),
+)
+
+# ╔═╡ 8abed5f0-2df0-41be-8d19-f1aadc5ce25b
+md"""
+The reported value at 2M of -12 kcal/mol for the denatured state (RCM-T1) appears consistent with the above integration. The reported -8.439 kcal/mol for the native state, though, appears to differ here. Although the trends are the same, we could not reproduce the exact reported value with despite different integration schemes.
 """
 
 # ╔═╡ 6da7221d-55be-41c2-b74d-00e993d299f6
@@ -323,7 +377,7 @@ Unitful = "~1.21.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.8"
+julia_version = "1.10.10"
 manifest_format = "2.0"
 project_hash = "89eb9cfc874aad1e4304ba045f70c6bb38d1f84f"
 
@@ -1100,7 +1154,7 @@ version = "0.3.23+4"
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
-version = "0.8.1+2"
+version = "0.8.5+0"
 
 [[deps.OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
@@ -1941,7 +1995,17 @@ version = "1.4.1+1"
 # ╟─681ecbaa-1370-468a-b3d8-7f01b373b3f6
 # ╟─d904f54e-e284-46bb-b7a6-9fae79e01300
 # ╟─5edbb407-3655-45f6-aa9b-8fae111b2eee
+# ╟─dbd33e76-8964-42d6-ac34-6e13f48d4742
+# ╟─c557e9ad-30dd-45a2-8222-7773c006b4f8
 # ╟─4f68effa-b334-4c85-b462-d5c6554e7ea3
+# ╟─762d7dd3-56ad-4a6c-93b0-b63e76f264ea
+# ╠═d45f3100-f19e-43e8-8c00-8d857d35c7a1
+# ╠═eefaddb7-7438-47e0-9681-3228ed639bc0
+# ╠═ae6d4b8c-ea7d-41f5-a868-d6c25d05e1a2
+# ╠═da1ad389-3f1a-46ec-b147-3191b2f09028
+# ╟─2033fe77-f353-410c-8098-970edf8cd45a
+# ╟─1204b448-18a1-459b-85d6-d7d9fa61a236
+# ╟─8abed5f0-2df0-41be-8d19-f1aadc5ce25b
 # ╟─6da7221d-55be-41c2-b74d-00e993d299f6
 # ╠═dff61cee-c2c4-41aa-8fc1-fbac08a67beb
 # ╠═3bac1a1e-9bb1-4125-9b58-2bd43d959fa9
