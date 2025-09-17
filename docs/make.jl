@@ -49,6 +49,7 @@ makedocs(
         "SH3 in tmao" => "sh3_tmao.md",
         "RNase T1 in urea" => "rnaset1_urea.md",
         "RNase T1 in tmao" => "rnaset1_tmao.md",
+        "Data Repository" => "$(@__DIR__)/src/data_files/index.md",
     ],
 )
 deploydocs(
